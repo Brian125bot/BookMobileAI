@@ -96,6 +96,19 @@ export default function Sidebar() {
               className="w-full bg-white border border-black/10 p-2 text-sm italic font-serif focus:outline-none focus:border-black/40 resize-none h-32"
             />
           </div>
+          <div>
+            <label className="text-[11px] block font-semibold mb-1">Auto-Save Interval (Minutes)</label>
+            <select
+              value={settings.autoSaveInterval}
+              onChange={(e) => setSettings({ autoSaveInterval: Number(e.target.value) })}
+              className="w-full bg-white border border-black/10 p-2 text-sm italic font-serif focus:outline-none focus:border-black/40"
+            >
+              <option value={0}>Off / Manual Only</option>
+              <option value={1}>1 Minute</option>
+              <option value={5}>5 Minutes</option>
+              <option value={15}>15 Minutes</option>
+            </select>
+          </div>
         </div>
       </section>
 

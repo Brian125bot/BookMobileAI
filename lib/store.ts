@@ -19,6 +19,7 @@ export interface ProjectSettings {
   writingStyle: WritingStyle;
   tone: string;
   additionalInstructions: string;
+  autoSaveInterval: number;
 }
 
 const defaultSettings: ProjectSettings = {
@@ -26,6 +27,7 @@ const defaultSettings: ProjectSettings = {
   writingStyle: 'short_essay',
   tone: 'Professional and engaging',
   additionalInstructions: 'Avoid common AI jargon. Write like a human expert.',
+  autoSaveInterval: 1, // Default 1 minute
 };
 
 interface AppState {
@@ -34,6 +36,8 @@ interface AppState {
   isLoaded: boolean;
   viewMode: 'canvas' | 'outline';
   isSidebarOpen: boolean;
+  hasUnsavedChanges: boolean;
+  lastSaved: Date | null;
   setViewMode: (mode: 'canvas' | 'outline') => void;
   toggleSidebar: () => void;
   setSettings: (settings: Partial<ProjectSettings>) => void;
@@ -45,6 +49,7 @@ interface AppState {
   rewriteChapter: (id: string) => Promise<void>;
   loadFromDb: () => Promise<void>;
   importProject: (data: { settings: ProjectSettings, chapters: Chapter[] }) => void;
+  manualSaveToDb: () => Promise<void>;
   // History
   past: { settings: ProjectSettings, chapters: Chapter[] }[];
   future: { settings: ProjectSettings, chapters: Chapter[] }[];
@@ -58,19 +63,27 @@ const DB_KEY = 'human-writer-project-data';
 let typingTimeout: NodeJS.Timeout | null = null;
 
 export const useStore = create<AppState>((setStore, getStore) => {
-  const saveToDb = (state: Partial<AppState>) => {
-    const { settings, chapters } = { ...getStore(), ...state };
-    set(DB_KEY, { settings, chapters }).catch(console.error);
-  };
-
   return {
     settings: defaultSettings,
     chapters: [],
     isLoaded: false,
     viewMode: 'canvas',
     isSidebarOpen: true,
+    hasUnsavedChanges: false,
+    lastSaved: null,
     past: [],
     future: [],
+
+    manualSaveToDb: async () => {
+      const state = getStore();
+      const { settings, chapters } = state;
+      try {
+        await set(DB_KEY, { settings, chapters });
+        setStore({ hasUnsavedChanges: false, lastSaved: new Date() });
+      } catch (error) {
+        console.error('Failed to save to DB', error);
+      }
+    },
 
     pushHistory: () => {
       setStore((state) => {
@@ -93,13 +106,12 @@ export const useStore = create<AppState>((setStore, getStore) => {
           chapters: JSON.parse(JSON.stringify(state.chapters)),
         };
         
-        saveToDb(previous);
-
         return {
           past: newPast,
           future: [currentSnapshot, ...state.future],
           settings: previous.settings,
           chapters: previous.chapters,
+          hasUnsavedChanges: true,
         };
       });
     },
@@ -114,13 +126,12 @@ export const useStore = create<AppState>((setStore, getStore) => {
           chapters: JSON.parse(JSON.stringify(state.chapters)),
         };
 
-        saveToDb(next);
-
         return {
           past: [...state.past, currentSnapshot],
           future: newFuture,
           settings: next.settings,
           chapters: next.chapters,
+          hasUnsavedChanges: true,
         };
       });
     },
@@ -133,16 +144,15 @@ export const useStore = create<AppState>((setStore, getStore) => {
       setStore({
         settings: data.settings,
         chapters: data.chapters,
+        hasUnsavedChanges: true,
       });
-      saveToDb({ settings: data.settings, chapters: data.chapters });
     },
 
     setSettings: (newSettings) => {
       getStore().pushHistory();
       setStore((state) => {
         const nextSettings = { ...state.settings, ...newSettings };
-        saveToDb({ settings: nextSettings });
-        return { settings: nextSettings };
+        return { settings: nextSettings, hasUnsavedChanges: true };
       });
     },
 
@@ -157,8 +167,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
           status: 'draft',
         };
         const nextChapters = [...state.chapters, newChapter];
-        saveToDb({ chapters: nextChapters });
-        return { chapters: nextChapters };
+        return { chapters: nextChapters, hasUnsavedChanges: true };
       });
     },
 
@@ -177,8 +186,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         const nextChapters = state.chapters.map((ch) =>
           ch.id === id ? { ...ch, ...data } : ch
         );
-        saveToDb({ chapters: nextChapters });
-        return { chapters: nextChapters };
+        return { chapters: nextChapters, hasUnsavedChanges: true };
       });
     },
 
@@ -186,8 +194,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
       getStore().pushHistory();
       setStore((state) => {
         const nextChapters = state.chapters.filter((ch) => ch.id !== id);
-        saveToDb({ chapters: nextChapters });
-        return { chapters: nextChapters };
+        return { chapters: nextChapters, hasUnsavedChanges: true };
       });
     },
 
@@ -201,8 +208,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
           const newChapters = [...state.chapters];
           const [moved] = newChapters.splice(activeIndex, 1);
           newChapters.splice(overIndex, 0, moved);
-          saveToDb({ chapters: newChapters });
-          return { chapters: newChapters };
+          return { chapters: newChapters, hasUnsavedChanges: true };
         }
         return state;
       });
@@ -262,9 +268,11 @@ export const useStore = create<AppState>((setStore, getStore) => {
             settings: data.settings || defaultSettings,
             chapters: data.chapters || [],
             isLoaded: true,
+            hasUnsavedChanges: false,
+            lastSaved: new Date(),
           });
         } else {
-          setStore({ isLoaded: true });
+          setStore({ isLoaded: true, hasUnsavedChanges: false });
         }
       } catch (error) {
         console.error('Failed to load from DB', error);

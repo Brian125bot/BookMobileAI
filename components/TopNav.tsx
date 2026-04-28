@@ -1,14 +1,47 @@
 "use client";
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
-import { Save, Upload, Download, Info, Undo2, Redo2 } from 'lucide-react';
+import { Save, Upload, Download, Info, Undo2, Redo2, Loader2, Check } from 'lucide-react';
 import AboutModal from './AboutModal';
 
 export default function TopNav() {
-  const { chapters, settings, importProject, undo, redo, past, future } = useStore();
+  const { chapters, settings, importProject, undo, redo, past, future, hasUnsavedChanges, lastSaved, manualSaveToDb } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (settings.autoSaveInterval <= 0) return;
+
+    const intervalId = setInterval(async () => {
+      if (useStore.getState().hasUnsavedChanges) {
+        setIsSaving(true);
+        await useStore.getState().manualSaveToDb();
+        setIsSaving(false);
+      }
+    }, settings.autoSaveInterval * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, [settings.autoSaveInterval]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (useStore.getState().hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  const handleManualSave = async () => {
+    setIsSaving(true);
+    await manualSaveToDb();
+    setIsSaving(false);
+  };
 
   const handleExportManuscript = () => {
     const content = chapters
@@ -74,6 +107,26 @@ export default function TopNav() {
         <span className="text-[10px] uppercase tracking-widest font-bold opacity-60">Long-Form Manuscript Engine</span>
       </div>
       <div className="flex items-center gap-4">
+        {settings.autoSaveInterval > 0 && (
+          <div className="flex items-center gap-2 mr-2 min-w-[120px] justify-end">
+            {isSaving ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin opacity-50" />
+                <span className="text-[10px] uppercase font-bold tracking-widest opacity-50">Saving...</span>
+              </>
+            ) : hasUnsavedChanges ? (
+              <span className="text-[10px] uppercase font-bold tracking-widest text-amber-600">Unsaved Changes</span>
+            ) : lastSaved ? (
+              <>
+                <Check className="w-3.5 h-3.5 opacity-50 text-emerald-600" />
+                <span className="text-[10px] uppercase font-bold tracking-widest opacity-50">
+                  Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </>
+            ) : null}
+          </div>
+        )}
+
         <div className="flex items-center gap-2 mr-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
           <span className="text-[10px] uppercase font-bold tracking-tighter opacity-70 italic">Gemini 3 Flash: Active</span>
@@ -125,11 +178,20 @@ export default function TopNav() {
             </button>
             <button 
                 onClick={handleSaveProject}
-                className="px-3 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-black/5 text-[#1a1a1a] transition-colors flex items-center gap-2"
-                title="Save Project Locally"
+                className="px-3 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-black/5 text-[#1a1a1a] transition-colors flex items-center gap-2 border-r border-black/20"
+                title="Download Project Locally"
+            >
+                <Download className="w-3.5 h-3.5" />
+                D/L Config
+            </button>
+            <button 
+                onClick={handleManualSave}
+                disabled={!hasUnsavedChanges || isSaving}
+                className="px-3 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-black/5 text-[#1a1a1a] transition-colors flex items-center gap-2 disabled:opacity-40"
+                title="Save Database"
             >
                 <Save className="w-3.5 h-3.5" />
-                Save Work
+                Save Data
             </button>
         </div>
 

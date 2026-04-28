@@ -13,6 +13,7 @@ export default function AboutModal({ isOpen, onClose }: Props) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -48,16 +49,16 @@ export default function AboutModal({ isOpen, onClose }: Props) {
                 <strong>Section-by-Section Drafting:</strong> Break your writing into chapters, acts, or scenes. Use the prompt field on each card to define specific plot points, arguments, or facts for that segment.
               </li>
               <li>
-                <strong>Engineered Humanization:</strong> BookMobile uses an ultra-strict background system prompt that aggressively eliminates standard AI hallmarks (numbered lists, dashes, cliches, "in conclusion"), forcing the model to generate varied, professional, full-sentence prose.
+                <strong>Engineered Humanization:</strong> BookMobile uses an ultra-strict background system prompt that aggressively eliminates standard AI hallmarks (numbered lists, dashes, cliches, &quot;in conclusion&quot;), forcing the model to generate varied, professional, full-sentence prose.
               </li>
               <li>
-                <strong>Drafting vs. Humanizing:</strong> "Draft" generates initial content based on your chapter prompt from scratch. "Humanize" refines existing content to improve sentence variance, rhythm, and flow without changing the core meaning.
+                <strong>Drafting vs. Humanizing:</strong> &quot;Draft&quot; generates initial content based on your chapter prompt from scratch. &quot;Humanize&quot; refines existing content to improve sentence variance, rhythm, and flow without changing the core meaning.
               </li>
               <li>
                 <strong>Card vs. Outline Views:</strong> The default Canvas space lets you view the actual text in a grid layout. The Outline space gives you a high-level view showing summaries, word counts, and flow status, allowing for rapid manuscript restructuring via drag-and-drop.
               </li>
               <li>
-                <strong>Local Saving:</strong> Work is auto-saved to your browser's local database. For long term storage, use the <em>Save Work</em> and <em>Load</em> buttons in the top navigation to work entirely locally via JSON backups.
+                <strong>Local Saving:</strong> Work is auto-saved to your browser&apos;s local database. For long term storage, use the <em>Save Work</em> and <em>Load</em> buttons in the top navigation to work entirely locally via JSON backups.
               </li>
             </ul>
           </div>
