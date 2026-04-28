@@ -2,11 +2,11 @@
 
 import React, { useRef, useState } from 'react';
 import { useStore } from '@/lib/store';
-import { Save, Upload, Download, Info } from 'lucide-react';
+import { Save, Upload, Download, Info, Undo2, Redo2 } from 'lucide-react';
 import AboutModal from './AboutModal';
 
 export default function TopNav() {
-  const { chapters, settings, importProject } = useStore();
+  const { chapters, settings, importProject, undo, redo, past, future } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
@@ -86,6 +86,25 @@ export default function TopNav() {
           onChange={handleLoadProject} 
           className="hidden" 
         />
+        
+        <div className="flex border border-black/20 mr-2">
+            <button 
+                onClick={undo}
+                disabled={past.length === 0}
+                className="px-3 py-2 text-[#1a1a1a] transition-colors hover:bg-black/5 disabled:opacity-30 border-r border-black/20"
+                title="Undo"
+            >
+                <Undo2 className="w-3.5 h-3.5" />
+            </button>
+            <button 
+                onClick={redo}
+                disabled={future.length === 0}
+                className="px-3 py-2 text-[#1a1a1a] transition-colors hover:bg-black/5 disabled:opacity-30"
+                title="Redo"
+            >
+                <Redo2 className="w-3.5 h-3.5" />
+            </button>
+        </div>
         
         <div className="flex border border-black/20">
             <button 

@@ -45,9 +45,17 @@ interface AppState {
   rewriteChapter: (id: string) => Promise<void>;
   loadFromDb: () => Promise<void>;
   importProject: (data: { settings: ProjectSettings, chapters: Chapter[] }) => void;
+  // History
+  past: { settings: ProjectSettings, chapters: Chapter[] }[];
+  future: { settings: ProjectSettings, chapters: Chapter[] }[];
+  undo: () => void;
+  redo: () => void;
+  pushHistory: () => void;
 }
 
 const DB_KEY = 'human-writer-project-data';
+
+let typingTimeout: NodeJS.Timeout | null = null;
 
 export const useStore = create<AppState>((setStore, getStore) => {
   const saveToDb = (state: Partial<AppState>) => {
@@ -61,11 +69,67 @@ export const useStore = create<AppState>((setStore, getStore) => {
     isLoaded: false,
     viewMode: 'canvas',
     isSidebarOpen: true,
+    past: [],
+    future: [],
+
+    pushHistory: () => {
+      setStore((state) => {
+        const snapshot = {
+          settings: JSON.parse(JSON.stringify(state.settings)),
+          chapters: JSON.parse(JSON.stringify(state.chapters)),
+        };
+        const past = [...state.past, snapshot].slice(-50); // limit to 50
+        return { past, future: [] };
+      });
+    },
+
+    undo: () => {
+      setStore((state) => {
+        if (state.past.length === 0) return state;
+        const previous = state.past[state.past.length - 1];
+        const newPast = state.past.slice(0, -1);
+        const currentSnapshot = {
+          settings: JSON.parse(JSON.stringify(state.settings)),
+          chapters: JSON.parse(JSON.stringify(state.chapters)),
+        };
+        
+        saveToDb(previous);
+
+        return {
+          past: newPast,
+          future: [currentSnapshot, ...state.future],
+          settings: previous.settings,
+          chapters: previous.chapters,
+        };
+      });
+    },
+
+    redo: () => {
+      setStore((state) => {
+        if (state.future.length === 0) return state;
+        const next = state.future[0];
+        const newFuture = state.future.slice(1);
+        const currentSnapshot = {
+          settings: JSON.parse(JSON.stringify(state.settings)),
+          chapters: JSON.parse(JSON.stringify(state.chapters)),
+        };
+
+        saveToDb(next);
+
+        return {
+          past: [...state.past, currentSnapshot],
+          future: newFuture,
+          settings: next.settings,
+          chapters: next.chapters,
+        };
+      });
+    },
 
     setViewMode: (mode) => setStore({ viewMode: mode }),
     toggleSidebar: () => setStore((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 
     importProject: (data) => {
+      getStore().pushHistory();
       setStore({
         settings: data.settings,
         chapters: data.chapters,
@@ -74,6 +138,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
     },
 
     setSettings: (newSettings) => {
+      getStore().pushHistory();
       setStore((state) => {
         const nextSettings = { ...state.settings, ...newSettings };
         saveToDb({ settings: nextSettings });
@@ -82,6 +147,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
     },
 
     addChapter: () => {
+      getStore().pushHistory();
       setStore((state) => {
         const newChapter: Chapter = {
           id: uuidv4(),
@@ -97,6 +163,16 @@ export const useStore = create<AppState>((setStore, getStore) => {
     },
 
     updateChapter: (id, data) => {
+      if (!typingTimeout) {
+        getStore().pushHistory();
+      } else {
+        clearTimeout(typingTimeout);
+      }
+      // reset session after 1s of inactivity
+      typingTimeout = setTimeout(() => {
+        typingTimeout = null;
+      }, 1000);
+
       setStore((state) => {
         const nextChapters = state.chapters.map((ch) =>
           ch.id === id ? { ...ch, ...data } : ch
@@ -107,6 +183,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
     },
 
     deleteChapter: (id) => {
+      getStore().pushHistory();
       setStore((state) => {
         const nextChapters = state.chapters.filter((ch) => ch.id !== id);
         saveToDb({ chapters: nextChapters });
@@ -115,6 +192,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
     },
 
     reorderChapters: (activeId, overId) => {
+      getStore().pushHistory();
       setStore((state) => {
         const activeIndex = state.chapters.findIndex(c => c.id === activeId);
         const overIndex = state.chapters.findIndex(c => c.id === overId);
@@ -131,6 +209,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
     },
 
     generateChapter: async (id) => {
+      getStore().pushHistory();
       const state = getStore();
       const chapterIndex = state.chapters.findIndex((c) => c.id === id);
       if (chapterIndex === -1) return;
@@ -153,6 +232,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
     },
 
     rewriteChapter: async (id) => {
+      getStore().pushHistory();
       const state = getStore();
       const chapterIndex = state.chapters.findIndex((c) => c.id === id);
       if (chapterIndex === -1) return;
