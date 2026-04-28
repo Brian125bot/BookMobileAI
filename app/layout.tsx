@@ -15,7 +15,7 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  title: 'AI Studio Writer tool',
+  title: ' BookMobile AI Studio Writer tool',
   description: 'AI-assisted long-form writing application without AI tropes.',
 };
 
