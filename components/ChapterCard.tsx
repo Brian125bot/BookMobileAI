@@ -93,30 +93,32 @@ export default function ChapterCard({ chapter, index }: Props) {
             </div>
 
             <div className="flex flex-col flex-1 min-h-0 gap-6">
-              <div className="flex flex-col shrink-0 flex-none">
-                <span className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-1 shrink-0">Instruction Prompt</span>
+              <div className="flex flex-col shrink-0 flex-none mx-auto w-full max-w-4xl">
+                <span className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-2 shrink-0 text-center">Instruction Prompt</span>
                 <textarea
                   value={chapter.prompt}
                   onChange={(e) => updateChapter(chapter.id, { prompt: e.target.value })}
                   placeholder="Specific instructions, plot points, facts for this chapter..."
-                  className="w-full leading-relaxed opacity-60 bg-transparent border border-transparent hover:border-black/10 focus:border-black/30 focus:opacity-100 focus:outline-none p-2 -mx-2 resize-none shrink-0 text-sm h-32"
+                  className="w-full leading-relaxed opacity-80 bg-transparent border border-black/10 hover:border-black/20 focus:border-black/30 focus:opacity-100 focus:outline-none p-4 resize-y shrink-0 text-base h-40 min-h-[80px] max-h-[60vh] rounded shadow-inner"
                   disabled={isBusy}
                   onPointerDown={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
                 />
               </div>
               
-              <div className="flex flex-col flex-1 min-h-0 relative border-t border-black/10 pt-4" onPointerDown={(e) => e.stopPropagation()}>
-                <span className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-2 shrink-0">Generated Manuscript</span>
-                <div className="overflow-y-auto flex-1 pr-4">
-                  <div className="prose prose-sm prose-gray max-w-none leading-relaxed opacity-80 prose-headings:font-serif text-sm prose-p:mb-6 prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-black/20 prose-th:p-2 prose-td:border prose-td:border-black/20 prose-td:p-2 prose-blockquote:border-l-4 prose-blockquote:border-black/30 prose-blockquote:pl-4 prose-blockquote:italic">
-                    {chapter.content ? (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
-                    ) : (
-                      <div className="italic opacity-40 h-full flex items-center justify-center pt-8">
-                        No manuscript generated yet. Draft this chapter to preview content.
-                      </div>
-                    )}
+              <div className="flex flex-col flex-1 min-h-0 relative border-t border-black/10 pt-6" onPointerDown={(e) => e.stopPropagation()}>
+                <span className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-4 shrink-0 text-center">Generated Manuscript</span>
+                <div className="overflow-y-auto flex-1 px-4 md:px-8 pb-12">
+                  <div className="mx-auto max-w-3xl">
+                    <div className="prose prose-base md:prose-lg prose-gray max-w-none leading-relaxed opacity-90 prose-headings:font-serif prose-p:mb-6 prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-black/20 prose-th:p-3 prose-td:border prose-td:border-black/20 prose-td:p-3 prose-blockquote:border-l-4 prose-blockquote:border-black/30 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:opacity-80">
+                      {chapter.content ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
+                      ) : (
+                        <div className="italic opacity-40 h-full flex items-center justify-center pt-8 text-center">
+                          No manuscript generated yet. Draft this chapter to preview content.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
