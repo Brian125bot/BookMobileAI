@@ -92,21 +92,8 @@ export default function ChapterCard({ chapter, index }: Props) {
               </div>
             </div>
 
-            <div className="flex flex-col flex-1 min-h-0 gap-6">
-              <div className="flex flex-col shrink-0 flex-none mx-auto w-full max-w-4xl">
-                <span className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-2 shrink-0 text-center">Instruction Prompt</span>
-                <textarea
-                  value={chapter.prompt}
-                  onChange={(e) => updateChapter(chapter.id, { prompt: e.target.value })}
-                  placeholder="Specific instructions, plot points, facts for this chapter..."
-                  className="w-full leading-relaxed opacity-80 bg-transparent border border-black/10 hover:border-black/20 focus:border-black/30 focus:opacity-100 focus:outline-none p-4 resize-y shrink-0 text-base h-40 min-h-[80px] max-h-[60vh] rounded shadow-inner"
-                  disabled={isBusy}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                />
-              </div>
-              
-              <div className="flex flex-col flex-1 min-h-0 relative border-t border-black/10 pt-6" onPointerDown={(e) => e.stopPropagation()}>
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex flex-col flex-1 min-h-0 relative" onPointerDown={(e) => e.stopPropagation()}>
                 <span className="text-[9px] font-bold uppercase tracking-widest opacity-40 mb-4 shrink-0 text-center">Generated Manuscript</span>
                 <div className="overflow-y-auto flex-1 px-4 md:px-8 pb-12">
                   <div className="mx-auto max-w-3xl">
