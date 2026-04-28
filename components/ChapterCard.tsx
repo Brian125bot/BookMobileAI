@@ -7,7 +7,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Chapter, useStore } from '@/lib/store';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Loader2, Maximize2, Minimize2 } from 'lucide-react';
+import { Loader2, Maximize2, Minimize2, AlertCircle, CheckCircle2, CircleDashed } from 'lucide-react';
 
 interface Props {
   chapter: Chapter;
@@ -133,19 +133,28 @@ export default function ChapterCard({ chapter, index }: Props) {
               </div>
               
               {isBusy ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin opacity-60" />
-                  <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">Processing</span>
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span className="text-[10px] uppercase font-bold tracking-widest">Generating</span>
                 </div>
               ) : chapter.errorMessage ? (
-                 <span className="text-[10px] uppercase font-bold tracking-widest text-red-600 truncate max-w-[120px]" title={chapter.errorMessage}>Error</span>
-              ) : chapter.content ? (
-                 <div className="flex items-center gap-3">
-                   <span className="text-[10px] font-bold uppercase opacity-40">{wordCount} Words</span>
-                   <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-600">Flow Verified</span>
+                 <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 text-red-700 rounded border border-red-200" title={chapter.errorMessage}>
+                   <AlertCircle className="w-3.5 h-3.5" />
+                   <span className="text-[10px] uppercase font-bold tracking-widest truncate max-w-[150px]">Error</span>
+                 </div>
+              ) : chapter.status === 'completed' || chapter.content ? (
+                 <div className="flex items-center gap-4">
+                   <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">{wordCount} Words</span>
+                   <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">
+                     <CheckCircle2 className="w-3.5 h-3.5" />
+                     <span className="text-[10px] uppercase font-bold tracking-widest">Completed</span>
+                   </div>
                  </div>
               ) : (
-                 <span className="text-[10px] uppercase font-bold tracking-widest text-amber-600">Awaiting Content</span>
+                 <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200">
+                   <CircleDashed className="w-3.5 h-3.5" />
+                   <span className="text-[10px] uppercase font-bold tracking-widest">Draft</span>
+                 </div>
               )}
             </div>
           </div>
@@ -240,19 +249,28 @@ export default function ChapterCard({ chapter, index }: Props) {
           </div>
           
           {isBusy ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-3.5 h-3.5 animate-spin opacity-60" />
-              <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">Processing</span>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span className="text-[10px] uppercase font-bold tracking-widest">Generating</span>
             </div>
           ) : chapter.errorMessage ? (
-             <span className="text-[10px] uppercase font-bold tracking-widest text-red-600 truncate max-w-[120px]" title={chapter.errorMessage}>Error</span>
-          ) : chapter.content ? (
-             <div className="flex items-center gap-3">
-               <span className="text-[10px] font-bold uppercase opacity-40">{wordCount} Words</span>
-               <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-600">Flow Verified</span>
+             <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 text-red-700 rounded border border-red-200" title={chapter.errorMessage}>
+               <AlertCircle className="w-3.5 h-3.5" />
+               <span className="text-[10px] uppercase font-bold tracking-widest truncate max-w-[150px]">Error</span>
+             </div>
+          ) : chapter.status === 'completed' || chapter.content ? (
+             <div className="flex items-center gap-4">
+               <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">{wordCount} Words</span>
+               <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">
+                 <CheckCircle2 className="w-3.5 h-3.5" />
+                 <span className="text-[10px] uppercase font-bold tracking-widest">Completed</span>
+               </div>
              </div>
           ) : (
-             <span className="text-[10px] uppercase font-bold tracking-widest text-amber-600">Awaiting Content</span>
+             <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200">
+               <CircleDashed className="w-3.5 h-3.5" />
+               <span className="text-[10px] uppercase font-bold tracking-widest">Draft</span>
+             </div>
           )}
         </div>
       </div>

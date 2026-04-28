@@ -4,7 +4,7 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Chapter, useStore } from '@/lib/store';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, CircleDashed } from 'lucide-react';
 
 interface Props {
   chapter: Chapter;
@@ -89,16 +89,25 @@ export default function OutlineItem({ chapter, index }: Props) {
       <div className="flex items-center gap-4 shrink-0 border-l border-black/10 pl-6">
         <div className="flex flex-col gap-1 items-end w-24">
           {isBusy ? (
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] uppercase font-bold tracking-widest text-black/60">Processing</span>
-              <Loader2 className="w-3 h-3 animate-spin opacity-60" />
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200 mt-1">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span className="text-[9px] uppercase font-bold tracking-widest">Generating</span>
             </div>
           ) : chapter.errorMessage ? (
-             <span className="text-[9px] uppercase font-bold tracking-widest text-red-600 truncate w-full text-right" title={chapter.errorMessage}>Error</span>
-          ) : chapter.content ? (
-             <span className="text-[9px] uppercase font-bold tracking-widest text-emerald-600">Flow Verified</span>
+             <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 text-red-700 rounded border border-red-200 mt-1" title={chapter.errorMessage}>
+               <AlertCircle className="w-3 h-3" />
+               <span className="text-[9px] uppercase font-bold tracking-widest truncate max-w-[80px]">Error</span>
+             </div>
+          ) : chapter.status === 'completed' || chapter.content ? (
+             <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 mt-1">
+               <CheckCircle2 className="w-3 h-3" />
+               <span className="text-[9px] uppercase font-bold tracking-widest">Completed</span>
+             </div>
           ) : (
-             <span className="text-[9px] uppercase font-bold tracking-widest text-amber-600">Awaiting Content</span>
+             <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200 mt-1">
+               <CircleDashed className="w-3 h-3" />
+               <span className="text-[9px] uppercase font-bold tracking-widest">Draft</span>
+             </div>
           )}
         </div>
       
