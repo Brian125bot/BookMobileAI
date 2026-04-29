@@ -119,6 +119,7 @@ export default function ChapterCard({ chapter, index }: Props) {
                     disabled={isBusy || !chapter.prompt.trim()}
                     className="text-[10px] uppercase font-bold tracking-widest text-[#1a1a1a] hover:underline disabled:opacity-30 disabled:hover:no-underline"
                     onPointerDown={(e) => e.stopPropagation()}
+                    title={!chapter.prompt.trim() ? "Provide an instruction prompt to draft this chapter" : "Generate manuscript"}
                   >
                     Draft
                   </button>
@@ -235,6 +236,7 @@ export default function ChapterCard({ chapter, index }: Props) {
                 disabled={isBusy || !chapter.prompt.trim()}
                 className="text-[10px] uppercase font-bold tracking-widest text-[#1a1a1a] hover:underline disabled:opacity-30 disabled:hover:no-underline"
                 onPointerDown={(e) => e.stopPropagation()}
+                title={!chapter.prompt.trim() ? "Provide an instruction prompt to draft this chapter" : "Generate manuscript"}
               >
                 Draft
               </button>

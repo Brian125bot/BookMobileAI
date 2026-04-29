@@ -37,12 +37,40 @@ function buildContextPrompt(previousChapters: Chapter[]): string {
   const contextParts = previousChapters.map((ch, idx) => {
     if (idx >= previousChapters.length - 2) {
       return `[PREVIOUS CHAPTER: ${ch.title}]\n${ch.content}\n`;
+    } else if (ch.summary) {
+      return `[PREVIOUS CHAPTER SUMMARY: ${ch.title}]\n${ch.summary}\n`;
     } else {
       return `[PREVIOUS CHAPTER SUMMARY: ${ch.title}]\n(Content happened earlier, provided title for continuity)\n`;
     }
   });
 
   return `\nCONTEXT FROM PREVIOUS CHAPTERS:\n${contextParts.join('\n')}\n---\n`;
+}
+
+export async function generateChapterSummary(content: string): Promise<string> {
+  if (!ai) {
+    return '';
+  }
+
+  const prompt = `Summarize the following chapter content concisely in 1-2 short sentences. Focus on the main action or point.\n\nCONTENT:\n${content.substring(0, 4000)}...`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        temperature: 0.2, // Low temp for factual summary
+      },
+    });
+
+    if (response.text) {
+      return response.text.trim();
+    }
+    return '';
+  } catch (error) {
+    console.error('Gemini API Error (Summary):', error);
+    return '';
+  }
 }
 
 export async function generateChapterContent(

@@ -41,7 +41,9 @@ export default function OutlineItem({ chapter, index }: Props) {
   };
 
   let summary = 'Empty chapter prompt. Provide details to begin.';
-  if (chapter.content) {
+  if (chapter.summary) {
+    summary = chapter.summary;
+  } else if (chapter.content) {
     const text = cleanSummary(chapter.content);
     summary = text.length > 120 ? text.substring(0, 120) + '...' : text;
   } else if (chapter.prompt) {

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { get, set } from 'idb-keyval';
 import { v4 as uuidv4 } from 'uuid';
-import { generateChapterContent, rewriteChapterContent } from './gemini';
+import { generateChapterContent, rewriteChapterContent, generateChapterSummary } from './gemini';
 
 export type WritingStyle = 'short_essay' | 'academic_paper' | 'book';
 
@@ -10,6 +10,7 @@ export interface Chapter {
   title: string;
   prompt: string;
   content: string;
+  summary?: string;
   status: 'draft' | 'generating' | 'rewriting' | 'completed' | 'error';
   errorMessage?: string;
 }
@@ -228,7 +229,8 @@ export const useStore = create<AppState>((setStore, getStore) => {
 
       try {
         const content = await generateChapterContent(chapter, previousChapters, settings);
-        getStore().updateChapter(id, { content, status: 'completed' });
+        const summary = await generateChapterSummary(content);
+        getStore().updateChapter(id, { content, summary, status: 'completed' });
       } catch (error: any) {
         getStore().updateChapter(id, { 
           status: 'error', 
@@ -251,7 +253,8 @@ export const useStore = create<AppState>((setStore, getStore) => {
 
       try {
         const content = await rewriteChapterContent(chapter, previousChapters, settings);
-        getStore().updateChapter(id, { content, status: 'completed' });
+        const summary = await generateChapterSummary(content);
+        getStore().updateChapter(id, { content, summary, status: 'completed' });
       } catch (error: any) {
         getStore().updateChapter(id, { 
           status: 'error', 
