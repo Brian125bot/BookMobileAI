@@ -1,6 +1,6 @@
-import Sidebar from '@/components/Sidebar';
-import Canvas from '@/components/Canvas';
-import TopNav from '@/components/TopNav';
+import Sidebar from '@/components/layout/Sidebar';
+import Canvas from '@/components/canvas/Canvas';
+import TopNav from '@/components/layout/TopNav';
 
 export default function Home() {
   return (

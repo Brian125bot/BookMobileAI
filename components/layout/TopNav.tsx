@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Save, Upload, Download, Info, Undo2, Redo2, Loader2, Check } from 'lucide-react';
-import AboutModal from './AboutModal';
+import AboutModal from '../modals/AboutModal';
 
 export default function TopNav() {
   const { chapters, settings, importProject, undo, redo, past, future, hasUnsavedChanges, lastSaved, manualSaveToDb } = useStore();

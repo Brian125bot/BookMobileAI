@@ -36,7 +36,7 @@ export default function AboutModal({ isOpen, onClose }: Props) {
         
         <div className="p-8 space-y-8 text-sm leading-relaxed opacity-80">
           <p>
-            <strong>BookMobile AI</strong> is a focused drafting environment designed for serious, long-form writing. It uses a structured "Context Waterfall" and targeted system instructions paired with a visual outlining tool to solve the common pitfalls of AI-assisted writing models (like clichéd phrasing and predictable formatting).
+            <strong>BookMobile AI</strong> is a focused drafting environment designed for serious, long-form writing. It uses a structured &quot;Context Waterfall&quot; and targeted system instructions paired with a visual outlining tool to solve the common pitfalls of AI-assisted writing models (like clichéd phrasing and predictable formatting).
           </p>
           
           <div>
@@ -49,10 +49,10 @@ export default function AboutModal({ isOpen, onClose }: Props) {
                 <strong>2. Outline Your Structure:</strong> Break your writing into chapters using the Outline space. You can drag and drop chapters to rearrange the sequence of events before any text is generated. <em>Note: A chapter cannot be drafted until you provide a prompt!</em>
               </li>
               <li>
-                <strong>3. Prompting & Drafting:</strong> Switch to the Canvas view. Use the prompt field on each card to define specific plot points, arguments, or facts. Hit "Draft" to generate a continuous, contextually aware manuscript segment.
+                <strong>3. Prompting & Drafting:</strong> Switch to the Canvas view. Use the prompt field on each card to define specific plot points, arguments, or facts. Hit &quot;Draft&quot; to generate a continuous, contextually aware manuscript segment.
               </li>
               <li>
-                <strong>4. Review and Humanize:</strong> If the prose feels too "AI-like", click "Humanize". This triggers a dedicated critical-thinking pass by the model to disrupt repetitive sentence lengths and scrub known AI buzzwords.
+                <strong>4. Review and Humanize:</strong> If the prose feels too &quot;AI-like&quot;, click &quot;Humanize&quot;. This triggers a dedicated critical-thinking pass by the model to disrupt repetitive sentence lengths and scrub known AI buzzwords.
               </li>
               <li>
                 <strong>5. Save & Export:</strong> Work is auto-saved locally. Export your finished manuscript to a unified Markdown (.md) file, or save a JSON backup for long-term secure storage.
