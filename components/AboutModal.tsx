@@ -36,29 +36,26 @@ export default function AboutModal({ isOpen, onClose }: Props) {
         
         <div className="p-8 space-y-8 text-sm leading-relaxed opacity-80">
           <p>
-            <strong>BookMobile AI</strong> is a focused drafting environment designed for serious, long-form writing. It uses targeted system instructions paired with a visual outlining tool to solve the common pitfalls of AI-assisted writing models.
+            <strong>BookMobile AI</strong> is a focused drafting environment designed for serious, long-form writing. It uses a structured "Context Waterfall" and targeted system instructions paired with a visual outlining tool to solve the common pitfalls of AI-assisted writing models (like clichéd phrasing and predictable formatting).
           </p>
           
           <div>
-            <h3 className="text-[10px] uppercase font-bold tracking-widest opacity-50 mb-3 border-b border-black/10 pb-2">How it Works</h3>
+            <h3 className="text-[10px] uppercase font-bold tracking-widest opacity-50 mb-3 border-b border-black/10 pb-2">Instructions for Use</h3>
             <ul className="list-disc pl-4 space-y-4">
               <li>
-                <strong>Global Parameters (Left Panel):</strong> Set the overarching tone, style, and instructions. These govern the entire manuscript to ensure consistency. Use the collapse toggle to hide the parameters while you write.
+                <strong>1. Establish the Global Context:</strong> Open the sidebar to set the overarching tone, style, and instructions. These govern the entire manuscript securely to ensure consistency across chapters.
               </li>
               <li>
-                <strong>Section-by-Section Drafting:</strong> Break your writing into chapters, acts, or scenes. Use the prompt field on each card to define specific plot points, arguments, or facts for that segment.
+                <strong>2. Outline Your Structure:</strong> Break your writing into chapters using the Outline space. You can drag and drop chapters to rearrange the sequence of events before any text is generated. <em>Note: A chapter cannot be drafted until you provide a prompt!</em>
               </li>
               <li>
-                <strong>Engineered Humanization:</strong> BookMobile uses an ultra-strict background system prompt that aggressively eliminates standard AI hallmarks (numbered lists, dashes, cliches, &quot;in conclusion&quot;), forcing the model to generate varied, professional, full-sentence prose.
+                <strong>3. Prompting & Drafting:</strong> Switch to the Canvas view. Use the prompt field on each card to define specific plot points, arguments, or facts. Hit "Draft" to generate a continuous, contextually aware manuscript segment.
               </li>
               <li>
-                <strong>Drafting vs. Humanizing:</strong> &quot;Draft&quot; generates initial content based on your chapter prompt from scratch. &quot;Humanize&quot; refines existing content to improve sentence variance, rhythm, and flow without changing the core meaning.
+                <strong>4. Review and Humanize:</strong> If the prose feels too "AI-like", click "Humanize". This triggers a dedicated critical-thinking pass by the model to disrupt repetitive sentence lengths and scrub known AI buzzwords.
               </li>
               <li>
-                <strong>Card vs. Outline Views:</strong> The default Canvas space lets you view the actual text in a grid layout. The Outline space gives you a high-level view showing summaries, word counts, and flow status, allowing for rapid manuscript restructuring via drag-and-drop.
-              </li>
-              <li>
-                <strong>Local Saving:</strong> Work is auto-saved to your browser&apos;s local database. For long term storage, use the <em>Save Work</em> and <em>Load</em> buttons in the top navigation to work entirely locally via JSON backups.
+                <strong>5. Save & Export:</strong> Work is auto-saved locally. Export your finished manuscript to a unified Markdown (.md) file, or save a JSON backup for long-term secure storage.
               </li>
             </ul>
           </div>
