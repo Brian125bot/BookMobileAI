@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useStore, WritingStyle } from '@/lib/store';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, Sparkles, Sliders, AlertTriangle } from 'lucide-react';
 
 export default function Sidebar() {
   const { settings, setSettings, isLoaded, isSidebarOpen, toggleSidebar } = useStore();
@@ -13,107 +13,155 @@ export default function Sidebar() {
     setMounted(true);
   }, []);
 
-  if (!mounted || !isLoaded) return <aside className="w-72 border-r border-black/10 p-6 flex flex-col gap-8 bg-[#f9f8f4] animate-pulse shrink-0" />;
-
-  if (!isSidebarOpen) {
-    return (
-      <aside className="w-12 border-r border-black/10 bg-[#f9f8f4] flex flex-col items-center py-4 shrink-0 transition-all duration-300">
-        <button 
-          onClick={toggleSidebar} 
-          className="p-2 hover:bg-black/5 opacity-60 hover:opacity-100 transition-all rounded" 
-          title="Open Project Config"
-        >
-          <PanelLeftOpen className="w-4 h-4" />
-        </button>
-      </aside>
-    );
+  if (!mounted || !isLoaded) {
+    return <aside className="hidden md:flex w-72 border-r border-stone-200 p-6 flex-col gap-8 bg-stone-50 animate-pulse shrink-0" />;
   }
 
+  // Is there an API key configured? If not, we will display an aesthetic notice
+  const isApiKeyMissing = !process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
   return (
-    <aside className="w-72 border-r border-black/10 p-6 flex flex-col gap-8 bg-[#f9f8f4] overflow-y-auto shrink-0 relative transition-all duration-300">
-      <button 
-        onClick={toggleSidebar} 
-        className="absolute top-4 right-4 p-2 hover:bg-black/5 opacity-60 hover:opacity-100 transition-all rounded" 
-        title="Collapse Config"
+    <>
+      {/* MOBILE DRAWER BACKDROP */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-stone-900/30 backdrop-blur-xs z-40 md:hidden cursor-pointer"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* MOBILE & DESKTOP SIDEBAR DRAWER PANEL */}
+      <aside 
+        className={`fixed inset-y-0 left-0 z-45 md:z-30 w-72 border-r border-stone-200 p-6 flex flex-col gap-6 bg-stone-50/98 md:bg-stone-50 overflow-y-auto shrink-0 md:sticky md:top-0 md:h-[calc(100vh-4rem)] transition-all duration-300 ease-in-out
+          ${isSidebarOpen 
+            ? 'translate-x-0 opacity-100 shadow-xl md:shadow-none md:w-72' 
+            : '-translate-x-full md:translate-x-0 md:w-14 md:px-2 md:py-4 md:items-center'
+          }
+        `}
       >
-        <PanelLeftClose className="w-4 h-4" />
-      </button>
-      
-      <section>
-        <h3 className="text-[10px] uppercase font-bold tracking-widest mb-4 opacity-50">Project Config</h3>
-        
-        {!process.env.NEXT_PUBLIC_GEMINI_API_KEY && (
-          <div className="mb-4 bg-red-50 text-red-700 text-xs p-3 rounded-sm border border-red-200">
-            <p className="font-bold">API Key missing.</p>
-            <p className="opacity-80">Set NEXT_PUBLIC_GEMINI_API_KEY to generate.</p>
+        {/* COLLAPSED DESKTOP STATE TRIGGER VIEW */}
+        {!isSidebarOpen && (
+          <div className="hidden md:flex flex-col items-center gap-6 w-full font-sans">
+            <button 
+              onClick={toggleSidebar} 
+              className="p-2 hover:bg-stone-200 text-stone-600 hover:text-stone-900 transition-all rounded-lg cursor-pointer" 
+              title="Expand parameters panel"
+            >
+              <PanelLeftOpen className="w-4 h-4" />
+            </button>
+            <div className="h-[1px] w-6 bg-stone-200"></div>
+            <div className="flex flex-col gap-4 text-stone-400 text-[10px] text-center items-center font-mono tracking-widest uppercase [writing-mode:vertical-lr] scale-90">
+              <span className="flex items-center gap-1"><Sliders className="w-3.5 h-3.5" /> Project Config</span>
+            </div>
           </div>
         )}
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-[11px] block font-semibold mb-1">Subject</label>
-            <textarea
-              value={settings.subject}
-              onChange={(e) => setSettings({ subject: e.target.value })}
-              placeholder="e.g. The Architecture of Silence..."
-              className="w-full bg-white border border-black/10 p-2 text-sm italic font-serif focus:outline-none focus:border-black/40 resize-none h-20"
-            />
-          </div>
-          <div>
-            <label className="text-[11px] block font-semibold mb-1">Writing Style</label>
-            <select
-              value={settings.writingStyle}
-              onChange={(e) => setSettings({ writingStyle: e.target.value as WritingStyle })}
-              className="w-full bg-white border border-black/10 p-2 text-sm italic font-serif focus:outline-none focus:border-black/40"
-            >
-              <option value="short_essay">Long-form Essay</option>
-              <option value="academic_paper">Academic Paper</option>
-              <option value="book">Book</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-[11px] block font-semibold mb-1">Tone</label>
-            <input
-              type="text"
-              value={settings.tone}
-              onChange={(e) => setSettings({ tone: e.target.value })}
-              placeholder="e.g. Journalistic, formal..."
-              className="w-full bg-white border border-black/10 p-2 text-sm italic font-serif focus:outline-none focus:border-black/40"
-            />
-          </div>
-        </div>
-      </section>
+        {/* FULL EXPANDABLE STATE VIEW */}
+        {isSidebarOpen && (
+          <div className="flex flex-col h-full gap-6 select-none font-sans">
+            {/* Header section with explicit placement */}
+            <div className="flex items-center justify-between pb-2 border-b border-stone-200/60 shrink-0">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-stone-700" />
+                <h3 className="text-[11px] uppercase font-bold tracking-[0.12em] text-stone-800">Project Parameters</h3>
+              </div>
+              <button 
+                onClick={toggleSidebar} 
+                className="p-1.5 hover:bg-stone-200 text-stone-550 hover:text-stone-800 transition-all rounded-md cursor-pointer" 
+                title="Collapse Panel"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            </div>
 
-      <section>
-        <h3 className="text-[10px] uppercase font-bold tracking-widest mb-4 opacity-50">Global Parameters</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="text-[11px] block font-semibold mb-1">System Instructions</label>
-            <textarea
-              value={settings.additionalInstructions}
-              onChange={(e) => setSettings({ additionalInstructions: e.target.value })}
-              placeholder="Rules to enforce globally..."
-              className="w-full bg-white border border-black/10 p-2 text-sm italic font-serif focus:outline-none focus:border-black/40 resize-none h-32"
-            />
-          </div>
-          <div>
-            <label className="text-[11px] block font-semibold mb-1">Auto-Save Interval (Minutes)</label>
-            <select
-              value={settings.autoSaveInterval}
-              onChange={(e) => setSettings({ autoSaveInterval: Number(e.target.value) })}
-              className="w-full bg-white border border-black/10 p-2 text-sm italic font-serif focus:outline-none focus:border-black/40"
-            >
-              <option value={0}>Off / Manual Only</option>
-              <option value={1}>1 Minute</option>
-              <option value={5}>5 Minutes</option>
-              <option value={15}>15 Minutes</option>
-            </select>
-          </div>
-        </div>
-      </section>
+            {/* API KEY INDICATOR ALERT */}
+            {isApiKeyMissing && (
+              <div className="bg-amber-50 rounded-lg p-3.5 text-[11px] leading-relaxed text-amber-800 border border-amber-200 flex gap-2 w-full animate-pulse">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-semibold mb-0.5">Gemini API Key Missing</p>
+                  <p className="opacity-80">Please set <code className="font-mono bg-amber-100 px-1 py-0.5 rounded text-[10px]">NEXT_PUBLIC_GEMINI_API_KEY</code> in environment settings to initiate drawing drafts.</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Subject configuration container */}
+            <section className="space-y-4">
+              <div>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Book / Essay Subject</label>
+                <textarea
+                  value={settings.subject}
+                  onChange={(e) => setSettings({ subject: e.target.value })}
+                  placeholder="The unspoken rules of editorial precision..."
+                  className="w-full bg-white border border-stone-200 rounded-lg p-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow resize-none h-20 shadow-sm"
+                />
+              </div>
 
-      <div className="mt-auto pt-8">
-      </div>
-    </aside>
+              <div>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Writing Style Format</label>
+                <div className="relative">
+                  <select
+                    value={settings.writingStyle}
+                    onChange={(e) => setSettings({ writingStyle: e.target.value as WritingStyle })}
+                    className="w-full bg-white border border-stone-200 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow appearance-none cursor-pointer shadow-sm"
+                  >
+                    <option value="short_essay">Long-form Essay</option>
+                    <option value="academic_paper">Academic Paper</option>
+                    <option value="book">Manuscript Novel</option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400 text-xs">▼</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Narrative Mode & Tone</label>
+                <input
+                  type="text"
+                  value={settings.tone}
+                  onChange={(e) => setSettings({ tone: e.target.value })}
+                  placeholder="e.g. Philosophical, slow-paced..."
+                  className="w-full bg-white border border-stone-200 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow shadow-sm"
+                />
+              </div>
+            </section>
+
+            <div className="h-[1px] bg-stone-200/60"></div>
+
+            {/* System / LLM controller parameters block */}
+            <section className="space-y-4 flex-1">
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-stone-500" />
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block">System Anti-Trope Rules</label>
+                </div>
+                <textarea
+                  value={settings.additionalInstructions}
+                  onChange={(e) => setSettings({ additionalInstructions: e.target.value })}
+                  placeholder="e.g. Eliminate passive voice, use descriptive visual descriptions..."
+                  className="w-full bg-white border border-stone-200 rounded-lg p-3 text-xs italic font-serif text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow resize-none h-36 shadow-sm leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Cloud Auto-Save Sync</label>
+                <div className="relative">
+                  <select
+                    value={settings.autoSaveInterval}
+                    onChange={(e) => setSettings({ autoSaveInterval: Number(e.target.value) })}
+                    className="w-full bg-white border border-stone-200 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow appearance-none cursor-pointer shadow-sm"
+                  >
+                    <option value={0}>Disabled / Save Manually</option>
+                    <option value={1}>Every 1 Minute</option>
+                    <option value={5}>Every 5 Minutes</option>
+                    <option value={15}>Every 15 Minutes</option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400 text-xs">▼</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+      </aside>
+    </>
   );
 }

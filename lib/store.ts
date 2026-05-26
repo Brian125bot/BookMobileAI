@@ -5,6 +5,12 @@ import { generateChapterContent, rewriteChapterContent, generateChapterSummary }
 
 export type WritingStyle = 'short_essay' | 'academic_paper' | 'book';
 
+export interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'info' | 'error';
+}
+
 export interface Chapter {
   id: string;
   title: string;
@@ -39,6 +45,9 @@ interface AppState {
   isSidebarOpen: boolean;
   hasUnsavedChanges: boolean;
   lastSaved: Date | null;
+  toasts: Toast[];
+  addToast: (message: string, type?: 'success' | 'info' | 'error') => void;
+  removeToast: (id: string) => void;
   setViewMode: (mode: 'canvas' | 'outline') => void;
   toggleSidebar: () => void;
   setSettings: (settings: Partial<ProjectSettings>) => void;
@@ -74,6 +83,23 @@ export const useStore = create<AppState>((setStore, getStore) => {
     lastSaved: null,
     past: [],
     future: [],
+    toasts: [],
+
+    addToast: (message, type = 'success') => {
+      const id = uuidv4();
+      setStore((state) => ({
+        toasts: [...state.toasts, { id, message, type }].slice(-5),
+      }));
+      setTimeout(() => {
+        getStore().removeToast(id);
+      }, 4500);
+    },
+
+    removeToast: (id) => {
+      setStore((state) => ({
+        toasts: state.toasts.filter((t) => t.id !== id),
+      }));
+    },
 
     manualSaveToDb: async () => {
       const state = getStore();
@@ -81,8 +107,10 @@ export const useStore = create<AppState>((setStore, getStore) => {
       try {
         await set(DB_KEY, { settings, chapters });
         setStore({ hasUnsavedChanges: false, lastSaved: new Date() });
+        state.addToast('All progress saved to local storage', 'success');
       } catch (error) {
         console.error('Failed to save to DB', error);
+        state.addToast('Failed to save to local database', 'error');
       }
     },
 
@@ -147,6 +175,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         chapters: data.chapters,
         hasUnsavedChanges: true,
       });
+      getStore().addToast('Project imported successfully', 'success');
     },
 
     setSettings: (newSettings) => {
@@ -168,6 +197,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
           status: 'draft',
         };
         const nextChapters = [...state.chapters, newChapter];
+        setTimeout(() => getStore().addToast(`Added Chapter ${nextChapters.length}`, 'info'), 30);
         return { chapters: nextChapters, hasUnsavedChanges: true };
       });
     },
@@ -195,6 +225,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
       getStore().pushHistory();
       setStore((state) => {
         const nextChapters = state.chapters.filter((ch) => ch.id !== id);
+        setTimeout(() => getStore().addToast('Deleted chapter', 'info'), 30);
         return { chapters: nextChapters, hasUnsavedChanges: true };
       });
     },
@@ -226,16 +257,19 @@ export const useStore = create<AppState>((setStore, getStore) => {
       const settings = state.settings;
 
       getStore().updateChapter(id, { status: 'generating', errorMessage: '' });
+      getStore().addToast(`Drafting "${chapter.title}" with Gemini...`, 'info');
 
       try {
         const content = await generateChapterContent(chapter, previousChapters, settings);
         const summary = await generateChapterSummary(content);
         getStore().updateChapter(id, { content, summary, status: 'completed' });
+        getStore().addToast(`Draft created for "${chapter.title}"`, 'success');
       } catch (error: any) {
         getStore().updateChapter(id, { 
           status: 'error', 
           errorMessage: error?.message || 'Failed to generate chapter' 
         });
+        getStore().addToast(`Draft failed: ${error?.message || 'Unknown error'}`, 'error');
       }
     },
 
@@ -250,16 +284,19 @@ export const useStore = create<AppState>((setStore, getStore) => {
       const settings = state.settings;
 
       getStore().updateChapter(id, { status: 'rewriting', errorMessage: '' });
+      getStore().addToast(`Humanizing critical rewrite...`, 'info');
 
       try {
         const content = await rewriteChapterContent(chapter, previousChapters, settings);
         const summary = await generateChapterSummary(content);
         getStore().updateChapter(id, { content, summary, status: 'completed' });
+        getStore().addToast(`Manuscript successfully polished!`, 'success');
       } catch (error: any) {
         getStore().updateChapter(id, { 
           status: 'error', 
           errorMessage: error?.message || 'Failed to rewrite chapter' 
         });
+        getStore().addToast(`Rewrite failed: ${error?.message || 'Unknown error'}`, 'error');
       }
     },
 

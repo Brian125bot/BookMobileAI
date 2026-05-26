@@ -1,6 +1,7 @@
 import Sidebar from '@/components/layout/Sidebar';
 import Canvas from '@/components/canvas/Canvas';
 import TopNav from '@/components/layout/TopNav';
+import ToastContainer from '@/components/layout/ToastContainer';
 
 export default function Home() {
   return (
@@ -11,6 +12,8 @@ export default function Home() {
         <Sidebar />
         <Canvas />
       </main>
+
+      <ToastContainer />
     </div>
   );
 }
