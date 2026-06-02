@@ -28,6 +28,8 @@ export default function ChapterCard({ chapter, index }: Props) {
   const { updateChapter, deleteChapter, generateChapter, rewriteChapter } = useStore();
   const [isMaximized, setIsMaximized] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isEditingCanvasManuscript, setIsEditingCanvasManuscript] = useState(false);
+  const [isEditingMaximizedManuscript, setIsEditingMaximizedManuscript] = useState(false);
 
   const {
     attributes,
@@ -217,31 +219,58 @@ export default function ChapterCard({ chapter, index }: Props) {
             <div className="flex-1 bg-white flex flex-col overflow-hidden">
               {/* Workspace Navigation header */}
               <div className="h-14 border-b border-stone-100 px-6 flex items-center justify-between shrink-0 select-none">
-                <div className="flex items-center gap-2 text-stone-400">
-                  <BookOpen className="w-4 h-4" />
-                  <span className="text-[10px] uppercase tracking-widest font-bold font-mono">Typographic Print Preview</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-stone-500">
+                    <BookOpen className="w-4 h-4 text-stone-400" />
+                    <span className="text-[10px] uppercase tracking-widest font-bold font-mono">Typographic Workspace</span>
+                  </div>
+                  
+                  {/* Styled Segmented Control Button Pill */}
+                  <div className="flex rounded-lg bg-stone-100 p-0.5 border border-stone-200">
+                    <button
+                      onClick={() => setIsEditingMaximizedManuscript(false)}
+                      className={`text-[9px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded transition-all cursor-pointer ${!isEditingMaximizedManuscript ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-850'}`}
+                    >
+                      Preview
+                    </button>
+                    <button
+                      onClick={() => setIsEditingMaximizedManuscript(true)}
+                      className={`text-[9px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded transition-all cursor-pointer ${isEditingMaximizedManuscript ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-855'}`}
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </div>
 
-                {chapter.content && (
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400">
-                    Word Count: <span className="text-stone-800">{wordCount} words</span>
-                  </span>
-                )}
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400">
+                  Word Count: <span className="text-stone-800 font-semibold">{wordCount} words</span>
+                </span>
               </div>
 
               {/* Continuous clean pages canvas section */}
-              <div className="flex-1 overflow-y-auto px-6 md:px-16 py-12 md:py-20 select-text">
-                <div className="max-w-2xl mx-auto">
+              <div className="flex-1 overflow-y-auto px-6 md:px-16 py-12 md:py-20 select-text bg-[#fdfdfc]/50">
+                <div className="max-w-2xl mx-auto min-h-full">
                   {/* Markdown typographic print renderer */}
-                  {chapter.content ? (
+                  {isEditingMaximizedManuscript ? (
+                    <div className="h-full flex flex-col">
+                      <textarea
+                        value={chapter.content || ''}
+                        onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                        placeholder="Draft directly or let Gemini generate it. This workspace supports standard markdown format..."
+                        className="w-full flex-1 min-h-[450px] leading-relaxed text-stone-850 text-base md:text-lg font-serif bg-transparent focus:outline-none resize-none placeholder-stone-300 border-none px-0 py-0"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  ) : chapter.content ? (
                     <article className="prose prose-stone max-w-none font-serif leading-loose text-stone-900 text-base md:text-lg prose-p:mb-8 prose-p:indent-6 prose-headings:font-serif prose-headings:font-normal prose-headings:text-stone-950 prose-p:text-justify antialiased">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
                     </article>
                   ) : (
                     <div className="h-[280px] flex flex-col items-center justify-center text-center p-8 select-none">
-                      <div className="w-12 h-12 rounded-full bg-stone-50 border border-stone-100 flex items-center justify-center mb-4 text-stone-300">✍</div>
+                      <div className="w-12 h-12 rounded-full bg-stone-50/50 border border-stone-100 flex items-center justify-center mb-4 text-stone-300">✍</div>
                       <p className="font-serif italic text-stone-400 text-sm max-w-md">
-                        There is no written text here yet. Feed coordinates inside the prompt field on the left, then click &quot;Draft Segment&quot; to initialize the digital manuscript.
+                        There is no written text here yet. Click the &quot;Edit&quot; tab above to formulate story cells manually, or feed coordinates into the prompt field on the left and click &quot;Draft Segment&quot;.
                       </p>
                     </div>
                   )}
@@ -342,9 +371,27 @@ export default function ChapterCard({ chapter, index }: Props) {
           
           {/* Generated Text Scroll segment */}
           <div className="flex-1 flex flex-col min-h-0 border-t border-stone-100 mt-1 pt-3">
-            <span className="text-[9px] font-bold font-mono uppercase tracking-[0.15em] text-stone-400 mb-2.5 block shrink-0">STORY MANUSCRIPT</span>
+            <div className="flex items-center justify-between mb-2 shrink-0">
+              <span className="text-[9px] font-bold font-mono uppercase tracking-[0.15em] text-stone-400">STORY MANUSCRIPT</span>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsEditingCanvasManuscript(!isEditingCanvasManuscript); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="text-[9px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 px-1.5 py-0.5 rounded border border-stone-200 hover:bg-stone-50 transition-all cursor-pointer font-bold"
+              >
+                {isEditingCanvasManuscript ? "View" : "Edit"}
+              </button>
+            </div>
             <div className="flex-1 overflow-y-auto pr-1 select-text scrollbar-thin scrollbar-thumb-stone-200" onPointerDown={(e) => e.stopPropagation()}>
-              {chapter.content ? (
+              {isEditingCanvasManuscript ? (
+                <textarea
+                  value={chapter.content || ''}
+                  onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                  placeholder="Draft story prose content manually here..."
+                  className="w-full h-full leading-relaxed text-[11.5px] font-serif text-stone-850 bg-[#fdfbf8] border border-stone-200/75 hover:border-stone-300 rounded-lg p-2.5 resize-none focus:bg-white focus:outline-none focus:ring-1.5 focus:ring-stone-600/10 focus:border-stone-550 transition-all"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
+              ) : chapter.content ? (
                 <div className="prose prose-stone prose-sm max-w-none text-[11.5px] leading-relaxed text-stone-700 font-serif prose-p:mb-3 prose-p:indent-4 opacity-90">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
                 </div>
