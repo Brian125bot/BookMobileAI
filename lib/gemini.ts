@@ -47,7 +47,7 @@ function buildContextPrompt(previousChapters: Chapter[]): string {
   return `\nCONTEXT FROM PREVIOUS CHAPTERS:\n${contextParts.join('\n')}\n---\n`;
 }
 
-export async function generateChapterSummary(content: string): Promise<string> {
+export async function generateChapterSummary(content: string, model: string = 'gemini-3.5-flash'): Promise<string> {
   if (!ai) {
     return '';
   }
@@ -56,7 +56,7 @@ export async function generateChapterSummary(content: string): Promise<string> {
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: model,
       contents: prompt,
       config: {
         temperature: 0.2, // Low temp for factual summary
@@ -76,7 +76,8 @@ export async function generateChapterSummary(content: string): Promise<string> {
 export async function generateChapterContent(
   chapter: Chapter,
   previousChapters: Chapter[],
-  settings: ProjectSettings
+  settings: ProjectSettings,
+  model: string = 'gemini-3.5-flash'
 ): Promise<string> {
   if (!ai) {
     throw new Error('Gemini API key is not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your environment variables.');
@@ -93,7 +94,7 @@ Specific Chapter Prompt: ${chapter.prompt}
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: model,
       contents: prompt,
       config: {
         systemInstruction,
@@ -114,7 +115,8 @@ Specific Chapter Prompt: ${chapter.prompt}
 export async function rewriteChapterContent(
   chapter: Chapter,
   previousChapters: Chapter[],
-  settings: ProjectSettings
+  settings: ProjectSettings,
+  model: string = 'gemini-3.5-flash'
 ): Promise<string> {
   if (!ai) {
     throw new Error('Gemini API key is not configured.');
@@ -138,7 +140,7 @@ TASK: Rewrite the current draft text to be more engaging, smoother, and emphatic
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: model,
       contents: prompt,
       config: {
         systemInstruction,

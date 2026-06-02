@@ -27,6 +27,7 @@ export interface ProjectSettings {
   tone: string;
   additionalInstructions: string;
   autoSaveInterval: number;
+  selectedModel?: string;
 }
 
 const defaultSettings: ProjectSettings = {
@@ -35,6 +36,7 @@ const defaultSettings: ProjectSettings = {
   tone: 'Professional and engaging',
   additionalInstructions: 'Avoid common AI jargon. Write like a human expert.',
   autoSaveInterval: 1, // Default 1 minute
+  selectedModel: 'gemini-3.5-flash',
 };
 
 interface AppState {
@@ -71,6 +73,49 @@ interface AppState {
 const DB_KEY = 'human-writer-project-data';
 
 let typingTimeout: NodeJS.Timeout | null = null;
+let autoSaveTimeout: NodeJS.Timeout | null = null;
+
+// Dual-storage helper: Saves structured data to both LocalStorage and IndexedDB (if supported)
+const saveToLocalStorage = (settings: ProjectSettings, chapters: Chapter[]) => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const dataPayload = JSON.stringify({ settings, chapters });
+      window.localStorage.setItem(DB_KEY, dataPayload);
+      window.localStorage.setItem('bookmobile_project_settings', JSON.stringify(settings));
+      window.localStorage.setItem('bookmobile_project_chapters', JSON.stringify(chapters));
+    } catch (e) {
+      console.error('Failed to write to localStorage:', e);
+    }
+  }
+};
+
+// Generates a 1-second silent debounced auto-save function
+const triggerAutoSave = () => {
+  if (autoSaveTimeout) {
+    clearTimeout(autoSaveTimeout);
+  }
+  
+  autoSaveTimeout = setTimeout(async () => {
+    const store = useStore.getState();
+    if (store.hasUnsavedChanges) {
+      try {
+        const { settings, chapters } = store;
+        // Save to IndexedDB
+        await set(DB_KEY, { settings, chapters });
+        // Save to LocalStorage fallback
+        saveToLocalStorage(settings, chapters);
+        
+        // Quietly reset unsaved state
+        useStore.setState({
+          hasUnsavedChanges: false,
+          lastSaved: new Date()
+        });
+      } catch (err) {
+        console.error('Continuous auto-save failed:', err);
+      }
+    }
+  }, 1000);
+};
 
 export const useStore = create<AppState>((setStore, getStore) => {
   return {
@@ -105,12 +150,24 @@ export const useStore = create<AppState>((setStore, getStore) => {
       const state = getStore();
       const { settings, chapters } = state;
       try {
+        // Direct IndexedDB saving
         await set(DB_KEY, { settings, chapters });
+        // Direct LocalStorage saving
+        saveToLocalStorage(settings, chapters);
+        
         setStore({ hasUnsavedChanges: false, lastSaved: new Date() });
-        state.addToast('All progress saved to local storage', 'success');
+        state.addToast('All progress saved securely to local storage', 'success');
       } catch (error) {
         console.error('Failed to save to DB', error);
-        state.addToast('Failed to save to local database', 'error');
+        // Fallback to LocalStorage anyway
+        try {
+          saveToLocalStorage(settings, chapters);
+          setStore({ hasUnsavedChanges: false, lastSaved: new Date() });
+          state.addToast('Saved to browser localStorage (IndexedDB busy/unavailable)', 'info');
+        } catch (localErr) {
+          console.error('LocalStorage failed too', localErr);
+          state.addToast('Failed to save to local database', 'error');
+        }
       }
     },
 
@@ -143,6 +200,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
           hasUnsavedChanges: true,
         };
       });
+      triggerAutoSave();
     },
 
     redo: () => {
@@ -163,6 +221,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
           hasUnsavedChanges: true,
         };
       });
+      triggerAutoSave();
     },
 
     setViewMode: (mode) => setStore({ viewMode: mode }),
@@ -176,6 +235,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         hasUnsavedChanges: true,
       });
       getStore().addToast('Project imported successfully', 'success');
+      triggerAutoSave();
     },
 
     setSettings: (newSettings) => {
@@ -184,6 +244,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         const nextSettings = { ...state.settings, ...newSettings };
         return { settings: nextSettings, hasUnsavedChanges: true };
       });
+      triggerAutoSave();
     },
 
     addChapter: () => {
@@ -200,6 +261,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         setTimeout(() => getStore().addToast(`Added Chapter ${nextChapters.length}`, 'info'), 30);
         return { chapters: nextChapters, hasUnsavedChanges: true };
       });
+      triggerAutoSave();
     },
 
     updateChapter: (id, data) => {
@@ -219,6 +281,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         );
         return { chapters: nextChapters, hasUnsavedChanges: true };
       });
+      triggerAutoSave();
     },
 
     deleteChapter: (id) => {
@@ -228,6 +291,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         setTimeout(() => getStore().addToast('Deleted chapter', 'info'), 30);
         return { chapters: nextChapters, hasUnsavedChanges: true };
       });
+      triggerAutoSave();
     },
 
     reorderChapters: (activeId, overId) => {
@@ -244,6 +308,7 @@ export const useStore = create<AppState>((setStore, getStore) => {
         }
         return state;
       });
+      triggerAutoSave();
     },
 
     generateChapter: async (id) => {
@@ -255,13 +320,14 @@ export const useStore = create<AppState>((setStore, getStore) => {
       const chapter = state.chapters[chapterIndex];
       const previousChapters = state.chapters.slice(0, chapterIndex);
       const settings = state.settings;
+      const model = settings.selectedModel || 'gemini-3.5-flash';
 
       getStore().updateChapter(id, { status: 'generating', errorMessage: '' });
       getStore().addToast(`Drafting "${chapter.title}" with Gemini...`, 'info');
 
       try {
-        const content = await generateChapterContent(chapter, previousChapters, settings);
-        const summary = await generateChapterSummary(content);
+        const content = await generateChapterContent(chapter, previousChapters, settings, model);
+        const summary = await generateChapterSummary(content, model);
         getStore().updateChapter(id, { content, summary, status: 'completed' });
         getStore().addToast(`Draft created for "${chapter.title}"`, 'success');
       } catch (error: any) {
@@ -282,13 +348,14 @@ export const useStore = create<AppState>((setStore, getStore) => {
       const chapter = state.chapters[chapterIndex];
       const previousChapters = state.chapters.slice(0, chapterIndex);
       const settings = state.settings;
+      const model = settings.selectedModel || 'gemini-3.5-flash';
 
       getStore().updateChapter(id, { status: 'rewriting', errorMessage: '' });
       getStore().addToast(`Humanizing critical rewrite...`, 'info');
 
       try {
-        const content = await rewriteChapterContent(chapter, previousChapters, settings);
-        const summary = await generateChapterSummary(content);
+        const content = await rewriteChapterContent(chapter, previousChapters, settings, model);
+        const summary = await generateChapterSummary(content, model);
         getStore().updateChapter(id, { content, summary, status: 'completed' });
         getStore().addToast(`Manuscript successfully polished!`, 'success');
       } catch (error: any) {
@@ -302,7 +369,32 @@ export const useStore = create<AppState>((setStore, getStore) => {
 
     loadFromDb: async () => {
       try {
-        const data = await get(DB_KEY);
+        // Step 1: Attempt to load from IndexedDB
+        let data = await get(DB_KEY);
+        
+        // Step 2: If empty, try fallback LocalStorage
+        if (!data && typeof window !== 'undefined' && window.localStorage) {
+          const localDataStr = window.localStorage.getItem(DB_KEY);
+          if (localDataStr) {
+            try {
+              data = JSON.parse(localDataStr);
+            } catch (err) {
+              console.error('Failed to parse localStorage fallback data:', err);
+            }
+          }
+          
+          if (!data) {
+            const localSettings = window.localStorage.getItem('bookmobile_project_settings');
+            const localChapters = window.localStorage.getItem('bookmobile_project_chapters');
+            if (localSettings || localChapters) {
+              data = {
+                settings: localSettings ? JSON.parse(localSettings) : defaultSettings,
+                chapters: localChapters ? JSON.parse(localChapters) : [],
+              };
+            }
+          }
+        }
+
         if (data) {
           setStore({
             settings: data.settings || defaultSettings,
@@ -315,8 +407,30 @@ export const useStore = create<AppState>((setStore, getStore) => {
           setStore({ isLoaded: true, hasUnsavedChanges: false });
         }
       } catch (error) {
-        console.error('Failed to load from DB', error);
-        setStore({ isLoaded: true });
+        console.error('Failed to load from DB, applying LocalStorage recovery', error);
+        
+        // Active recovery mode using LocalStorage
+        let fallbackData = null;
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const localDataStr = window.localStorage.getItem(DB_KEY);
+          if (localDataStr) {
+            try {
+              fallbackData = JSON.parse(localDataStr);
+            } catch (err) {}
+          }
+        }
+        
+        if (fallbackData) {
+          setStore({
+            settings: fallbackData.settings || defaultSettings,
+            chapters: fallbackData.chapters || [],
+            isLoaded: true,
+            hasUnsavedChanges: false,
+            lastSaved: new Date(),
+          });
+        } else {
+          setStore({ isLoaded: true });
+        }
       }
     },
   };

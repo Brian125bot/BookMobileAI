@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Chapter, useStore } from '@/lib/store';
@@ -13,6 +13,7 @@ interface Props {
 
 export default function OutlineItem({ chapter, index }: Props) {
   const { updateChapter, deleteChapter } = useStore();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
     attributes,
@@ -123,14 +124,40 @@ export default function OutlineItem({ chapter, index }: Props) {
           )}
         </div>
       
-        <button
-          onClick={() => { if (confirm("Delete this chapter?")) deleteChapter(chapter.id); }}
-          className="p-1.5 hover:bg-red-50 text-stone-300 hover:text-red-650 rounded-lg cursor-pointer transition-colors hover:border hover:border-red-100 opacity-0 group-hover:opacity-100 shrink-0 h-8 flex items-center justify-center w-8"
-          title="Delete Chapter"
-          disabled={isBusy}
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+        {showDeleteConfirm ? (
+          <div className="flex items-center gap-1.5 font-sans" onPointerDown={(e) => e.stopPropagation()}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteChapter(chapter.id);
+                setShowDeleteConfirm(false);
+              }}
+              className="px-2 py-1 bg-red-650 hover:bg-red-700 text-white rounded text-[9px] font-mono font-bold uppercase tracking-wider cursor-pointer shadow-sm transition-colors"
+              title="Confirm Delete"
+            >
+              Delete
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteConfirm(false);
+              }}
+              className="px-1.5 py-1 bg-stone-100 border border-stone-200 text-stone-600 hover:text-stone-900 rounded text-[9px] font-mono font-bold uppercase tracking-wider cursor-pointer hover:bg-stone-200 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
+            className="p-1.5 hover:bg-red-50 text-stone-300 hover:text-red-650 rounded-lg cursor-pointer transition-colors hover:border hover:border-red-100 opacity-40 group-hover:opacity-100 shrink-0 h-8 flex items-center justify-center w-8"
+            title="Delete Chapter"
+            disabled={isBusy}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     </div>
   );

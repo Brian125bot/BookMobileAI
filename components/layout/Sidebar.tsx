@@ -143,7 +143,7 @@ export default function Sidebar() {
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Cloud Auto-Save Sync</label>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Local Auto-Save Engine</label>
                 <div className="relative">
                   <select
                     value={settings.autoSaveInterval}
