@@ -90,6 +90,25 @@ export default function ChapterCard({ chapter, index }: Props) {
     );
   };
 
+  let cardBorderClass = 'border-stone-200/90 shadow-xs hover:border-stone-450 hover:shadow-md hover:bg-[#fafaf7]/50';
+  let badgeClass = 'bg-stone-900 text-stone-50 border-stone-950';
+  if (isDragging) {
+    cardBorderClass = 'border-stone-950 shadow-2xl bg-white';
+    badgeClass = 'bg-stone-900 text-stone-50 border-stone-950';
+  } else if (isBusy) {
+    cardBorderClass = 'border-indigo-200 shadow-md bg-[#fafbff]/70 border-l-3 border-l-indigo-400 hover:border-indigo-400';
+    badgeClass = 'bg-indigo-600 text-white border-indigo-700 animate-pulse';
+  } else if (chapter.errorMessage) {
+    cardBorderClass = 'border-red-200 shadow-xs bg-red-50/10 border-l-3 border-l-red-400 hover:border-red-300';
+    badgeClass = 'bg-red-650 text-white border-red-700';
+  } else if (chapter.content) {
+    cardBorderClass = 'border-emerald-250/70 hover:border-emerald-350 shadow-xs bg-white border-l-3 border-l-emerald-500 hover:bg-emerald-50/5';
+    badgeClass = 'bg-emerald-700 text-white border-emerald-800';
+  } else {
+    cardBorderClass = 'border-stone-200/90 shadow-xs hover:border-stone-450 hover:shadow-md hover:bg-[#fafaf7]/55 border-l-3 border-l-stone-350/70';
+    badgeClass = 'bg-stone-500 text-stone-100 border-stone-600';
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -238,14 +257,10 @@ export default function ChapterCard({ chapter, index }: Props) {
       <div
         {...attributes}
         {...listeners}
-        className={`group bg-white absolute inset-0 rounded-xl border ${
-          isDragging 
-            ? 'border-stone-900 shadow-2xl' 
-            : 'border-stone-200/90 shadow-xs hover:border-stone-400 hover:shadow-md'
-        } transition-all duration-300 flex flex-col p-5 select-none ${isMaximized ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
+        className={`group bg-white absolute inset-0 rounded-xl border ${cardBorderClass} transition-all duration-300 flex flex-col p-5 select-none ${isMaximized ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
       >
         {/* Module Number badge */}
-        <div className="absolute -top-2.5 -left-2 bg-stone-900 border border-stone-950 text-stone-50 text-[9px] font-mono font-bold px-2 py-0.5 rounded-md z-10">
+        <div className={`absolute -top-2.5 -left-2 border text-[9px] font-mono font-bold px-2 py-0.5 rounded-md z-10 shadow-xs transition-colors duration-300 ${badgeClass}`}>
           CH {displayNum}
         </div>
         
@@ -290,7 +305,7 @@ export default function ChapterCard({ chapter, index }: Props) {
             <div className="flex items-center gap-1">
               <button
                 onClick={(e) => { e.stopPropagation(); setIsMaximized(true); }}
-                className="p-1 px-1.5 hover:bg-stone-100 text-stone-400 hover:text-stone-900 transition-colors rounded-md border border-transparent hover:border-stone-200 cursor-pointer"
+                className="p-1 px-1.5 hover:bg-stone-100/80 text-stone-400 hover:text-stone-900 transition-colors rounded-md border border-transparent hover:border-stone-200 cursor-pointer"
                 title="Maximize Focus Workspace (Zen Mode)"
                 onPointerDown={(e) => e.stopPropagation()}
               >
@@ -318,7 +333,7 @@ export default function ChapterCard({ chapter, index }: Props) {
               value={chapter.prompt}
               onChange={(e) => updateChapter(chapter.id, { prompt: e.target.value })}
               placeholder="Type instructions to outline the path..."
-              className="w-full leading-relaxed text-xs italic font-serif text-stone-700 bg-stone-50 border border-stone-200/60 hover:border-stone-200/80 rounded-lg p-2 resize-none shrink-0 h-[64px] focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 shadow-inner transition-all duration-150"
+              className="w-full leading-relaxed text-xs italic font-serif text-stone-700 bg-[#fdfbf8] hover:bg-[#faf8f4] border border-stone-200/75 hover:border-stone-300 rounded-lg p-2.5 resize-none shrink-0 h-[64px] focus:bg-white focus:outline-none focus:ring-1.5 focus:ring-stone-600/10 focus:border-stone-550 transition-all duration-150"
               disabled={isBusy}
               onPointerDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
@@ -328,13 +343,13 @@ export default function ChapterCard({ chapter, index }: Props) {
           {/* Generated Text Scroll segment */}
           <div className="flex-1 flex flex-col min-h-0 border-t border-stone-100 mt-1 pt-3">
             <span className="text-[9px] font-bold font-mono uppercase tracking-[0.15em] text-stone-400 mb-2.5 block shrink-0">STORY MANUSCRIPT</span>
-            <div className="flex-1 overflow-y-auto pr-1" onPointerDown={(e) => e.stopPropagation()}>
+            <div className="flex-1 overflow-y-auto pr-1 select-text scrollbar-thin scrollbar-thumb-stone-200" onPointerDown={(e) => e.stopPropagation()}>
               {chapter.content ? (
                 <div className="prose prose-stone prose-sm max-w-none text-[11.5px] leading-relaxed text-stone-700 font-serif prose-p:mb-3 prose-p:indent-4 opacity-90">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center p-4 border border-dashed border-stone-200/60 rounded-lg bg-stone-50 text-center text-[10.5px] text-stone-400 font-serif italic selection:bg-transparent">
+                <div className="h-full flex items-center justify-center p-4 border border-dashed border-stone-200/60 rounded-lg bg-stone-50/50 text-center text-[10.5px] text-stone-400 font-serif italic selection:bg-transparent">
                   Draft brief empty. Click &quot;Draft&quot; to invoke Gemini.
                 </div>
               )}
@@ -344,11 +359,11 @@ export default function ChapterCard({ chapter, index }: Props) {
 
         {/* Card Actions Bottom Row Footer */}
         <div className="flex justify-between items-center pt-3 mt-3 shrink-0 border-t border-stone-100">
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={(e) => { e.stopPropagation(); generateChapter(chapter.id); }}
               disabled={isBusy || !chapter.prompt.trim()}
-              className="text-[9px] font-mono uppercase font-bold tracking-widest text-stone-800 hover:text-stone-950 disabled:opacity-30 border border-stone-250/60 rounded px-2 py-1 bg-stone-50 hover:bg-stone-100 transition-colors shadow-xs active:scale-95 disabled:active:scale-100 cursor-pointer"
+              className="text-[9px] font-mono uppercase font-bold tracking-widest text-stone-800 hover:text-stone-950 disabled:opacity-30 border border-stone-200 rounded px-2.5 py-1.5 bg-stone-50 hover:bg-stone-100 transition-all active:scale-[0.96] disabled:active:scale-100 cursor-pointer shadow-2xs"
               onPointerDown={(e) => e.stopPropagation()}
               title="Generate raw sequence data"
             >
@@ -357,7 +372,7 @@ export default function ChapterCard({ chapter, index }: Props) {
             <button
               onClick={(e) => { e.stopPropagation(); rewriteChapter(chapter.id); }}
               disabled={isBusy || !chapter.content}
-              className="text-[9px] font-mono uppercase font-bold tracking-widest text-stone-650 hover:text-stone-950 disabled:opacity-30 border border-stone-250/60 rounded px-2 py-1 bg-stone-50 hover:bg-stone-100 transition-colors shadow-xs active:scale-95 disabled:active:scale-100 cursor-pointer"
+              className="text-[9px] font-mono uppercase font-bold tracking-widest text-stone-650 hover:text-stone-950 disabled:opacity-30 border border-stone-200 rounded px-2.5 py-1.5 bg-stone-50 hover:bg-stone-100 transition-all active:scale-[0.96] disabled:active:scale-100 cursor-pointer shadow-2xs"
               onPointerDown={(e) => e.stopPropagation()}
               title="Humantize generated prose"
             >

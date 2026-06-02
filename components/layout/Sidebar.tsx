@@ -32,7 +32,7 @@ export default function Sidebar() {
 
       {/* MOBILE & DESKTOP SIDEBAR DRAWER PANEL */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-45 md:z-30 w-72 border-r border-stone-200 p-6 flex flex-col gap-6 bg-stone-50/98 md:bg-stone-50 overflow-y-auto shrink-0 md:sticky md:top-0 md:h-[calc(100vh-4rem)] transition-all duration-300 ease-in-out
+        className={`fixed inset-y-0 left-0 z-45 md:z-30 w-72 border-r border-stone-200/80 p-6 flex flex-col gap-6.5 bg-[#fbfaf7]/98 md:bg-[#faf9f6]/90 md:backdrop-blur-md overflow-y-auto shrink-0 md:sticky md:top-0 md:h-[calc(100vh-4rem)] transition-all duration-300 ease-in-out
           ${isSidebarOpen 
             ? 'translate-x-0 opacity-100 shadow-xl md:shadow-none md:w-72' 
             : '-translate-x-full md:translate-x-0 md:w-14 md:px-2 md:py-4 md:items-center'
@@ -86,14 +86,14 @@ export default function Sidebar() {
             )}
             
             {/* Subject configuration container */}
-            <section className="space-y-4">
+            <section className="space-y-5">
               <div>
                 <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Book / Essay Subject</label>
                 <textarea
                   value={settings.subject}
                   onChange={(e) => setSettings({ subject: e.target.value })}
                   placeholder="The unspoken rules of editorial precision..."
-                  className="w-full bg-white border border-stone-200 rounded-lg p-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow resize-none h-20 shadow-sm"
+                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg p-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all resize-none h-20 shadow-xs"
                 />
               </div>
 
@@ -103,7 +103,7 @@ export default function Sidebar() {
                   <select
                     value={settings.writingStyle}
                     onChange={(e) => setSettings({ writingStyle: e.target.value as WritingStyle })}
-                    className="w-full bg-white border border-stone-200 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow appearance-none cursor-pointer shadow-sm"
+                    className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all appearance-none cursor-pointer shadow-xs"
                   >
                     <option value="short_essay">Long-form Essay</option>
                     <option value="academic_paper">Academic Paper</option>
@@ -120,7 +120,7 @@ export default function Sidebar() {
                   value={settings.tone}
                   onChange={(e) => setSettings({ tone: e.target.value })}
                   placeholder="e.g. Philosophical, slow-paced..."
-                  className="w-full bg-white border border-stone-200 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow shadow-sm"
+                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all shadow-xs"
                 />
               </div>
             </section>
@@ -128,7 +128,7 @@ export default function Sidebar() {
             <div className="h-[1px] bg-stone-200/60"></div>
 
             {/* System / LLM controller parameters block */}
-            <section className="space-y-4 flex-1">
+            <section className="space-y-5 flex-1">
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-stone-500" />
@@ -138,7 +138,7 @@ export default function Sidebar() {
                   value={settings.additionalInstructions}
                   onChange={(e) => setSettings({ additionalInstructions: e.target.value })}
                   placeholder="e.g. Eliminate passive voice, use descriptive visual descriptions..."
-                  className="w-full bg-white border border-stone-200 rounded-lg p-3 text-xs italic font-serif text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow resize-none h-36 shadow-sm leading-relaxed"
+                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg p-3 text-xs italic font-serif text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all resize-none h-30 shadow-xs leading-relaxed"
                 />
               </div>
 
@@ -148,7 +148,7 @@ export default function Sidebar() {
                   <select
                     value={settings.autoSaveInterval}
                     onChange={(e) => setSettings({ autoSaveInterval: Number(e.target.value) })}
-                    className="w-full bg-white border border-stone-200 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-500/10 focus:border-stone-400 transition-shadow appearance-none cursor-pointer shadow-sm"
+                    className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all appearance-none cursor-pointer shadow-xs"
                   >
                     <option value={0}>Disabled / Save Manually</option>
                     <option value={1}>Every 1 Minute</option>

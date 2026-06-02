@@ -359,7 +359,7 @@ export default function TopNav() {
   };
 
   return (
-    <header className="h-16 border-b border-stone-200 flex shrink-0 items-center justify-between px-6 bg-stone-50/95 backdrop-blur-md z-40 transition-colors">
+    <header className="h-16 border-b border-stone-200/80 flex shrink-0 items-center justify-between px-6 bg-[#faf9f6]/95 backdrop-blur-md shadow-xs z-40 transition-colors">
       {/* LEFT ZONE: BRANDING & SAVING PIPELINE */}
       <div className="flex items-center gap-4">
         <div className="flex flex-col">
@@ -367,28 +367,26 @@ export default function TopNav() {
           <span className="text-[9px] font-mono uppercase tracking-[0.15em] opacity-40 mt-1">Manuscript Engine</span>
         </div>
         
-        {settings.autoSaveInterval > 0 && (
-          <div className="hidden sm:flex items-center gap-1.5 pl-4 border-l border-stone-200">
-            {isSaving ? (
-              <div className="flex items-center gap-1.5 animate-pulse">
-                <Loader2 className="w-3 h-3 animate-spin text-stone-400" />
-                <span className="text-[9px] font-mono uppercase tracking-wider text-stone-400">Saving...</span>
-              </div>
-            ) : hasUnsavedChanges ? (
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                <span className="text-[9px] font-mono uppercase tracking-wider text-amber-600 font-medium">Unsaved Draft</span>
-              </div>
-            ) : lastSaved ? (
-              <div className="flex items-center gap-1.5">
-                <Check className="w-3 h-3 text-emerald-600" />
-                <span className="text-[9px] font-mono uppercase tracking-wider text-stone-400">
-                  Auto-saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            ) : null}
-          </div>
-        )}
+        <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-stone-200/80">
+          {isSaving ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100 animate-pulse">
+              <Loader2 className="w-2.5 h-2.5 animate-spin text-blue-600" />
+              <span className="text-[8.5px] font-mono uppercase tracking-widest font-bold">Syncing...</span>
+            </div>
+          ) : hasUnsavedChanges ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-50 rounded-full border border-amber-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <span className="text-[8.5px] font-mono uppercase tracking-widest text-amber-600 font-bold">Unsaved Draft</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-50 rounded-full border border-emerald-100">
+              <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+              <span className="text-[8.5px] font-mono uppercase tracking-widest text-emerald-700 font-bold">
+                {lastSaved ? `Synced ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'Synced with DB'}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* CENTER ZONE: DUAL VIEW SWITCHER & HISTORY CONTROLS */}

@@ -49,15 +49,30 @@ export default function OutlineItem({ chapter, index }: Props) {
     summary = text.length > 120 ? text.substring(0, 120) + '...' : text;
   }
 
+  let borderClass = 'border-stone-200/90 shadow-xs hover:border-stone-300';
+  let badgeClass = 'bg-stone-100/80 text-stone-750 border-stone-200/50';
+  if (isDragging) {
+    borderClass = 'border-stone-900 shadow-xl z-50 scale-[1.01] relative';
+    badgeClass = 'bg-stone-900 text-white';
+  } else if (isBusy) {
+    borderClass = 'border-indigo-200 shadow-xs bg-[#fafbff]/70 border-l-3 border-l-indigo-400';
+    badgeClass = 'bg-indigo-600 text-white border-indigo-750 animate-pulse text-[9px]';
+  } else if (chapter.errorMessage) {
+    borderClass = 'border-red-200 shadow-xs bg-red-50/10 border-l-3 border-l-red-400';
+    badgeClass = 'bg-red-600 text-white border-red-700 text-[9px]';
+  } else if (chapter.content) {
+    borderClass = 'border-emerald-200 shadow-xs bg-white border-l-3 border-l-emerald-500';
+    badgeClass = 'bg-emerald-700 text-white border-emerald-800 text-[9px]';
+  } else {
+    borderClass = 'border-stone-200/90 shadow-xs hover:border-stone-300 border-l-3 border-l-stone-350/70';
+    badgeClass = 'bg-stone-200 text-stone-600 border-stone-250 text-[9px]';
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`group bg-white rounded-xl border ${
-        isDragging 
-          ? 'border-stone-900 shadow-xl z-50 scale-[1.01] relative' 
-          : 'border-stone-200/90 shadow-xs hover:border-stone-300'
-      } transition-all duration-200 flex items-center py-2.5 px-4 font-sans text-left`}
+      className={`group bg-white rounded-xl border ${borderClass} transition-all duration-200 flex items-center py-2.5 px-4 font-sans text-left`}
     >
       {/* Isolated Draggable grip six-dot handle */}
       <div 
@@ -70,7 +85,7 @@ export default function OutlineItem({ chapter, index }: Props) {
       </div>
 
       {/* Structured item index indicator */}
-      <div className="w-8 h-8 rounded-lg flex shrink-0 items-center justify-center text-[10px] font-mono font-bold bg-stone-100 text-stone-750 mr-3 border border-stone-200/50">
+      <div className={`w-8 h-8 rounded-lg flex shrink-0 items-center justify-center font-mono font-bold mr-3 border transition-colors duration-350 ${badgeClass}`}>
         {displayNum}
       </div>
 
