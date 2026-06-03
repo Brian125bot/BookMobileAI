@@ -20,42 +20,62 @@ export default function AboutModal({ isOpen, onClose }: Props) {
   if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm p-4 font-sans text-[#1a1a1a]">
-      <div className="bg-[#fdfcfb] border border-black/20 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl relative flex flex-col pt-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-900/20 backdrop-blur-[2px] p-4 font-sans text-stone-800">
+      <div className="bg-white border border-stone-200/60 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-xl relative flex flex-col pt-4">
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 p-2 hover:bg-black/5 rounded transition-all opacity-60 hover:opacity-100"
+          className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
         
-        <div className="p-8 pb-6 border-b border-black/10">
-          <h2 className="text-3xl font-serif italic mb-2">BookMobile AI</h2>
-          <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">Structured Long-Form Engine</p>
+        <div className="px-8 pb-6 pt-5 border-b border-stone-100 shrink-0">
+          <h2 className="text-3xl font-serif text-stone-900 mb-1.5 leading-none">BookMobile</h2>
+          <p className="text-[10px] uppercase font-bold tracking-[0.15em] text-stone-400">Structured Long-Form Engine</p>
         </div>
         
-        <div className="p-8 space-y-8 text-sm leading-relaxed opacity-80">
-          <p>
-            <strong>BookMobile AI</strong> is a focused drafting environment designed for serious, long-form writing. It uses a structured &quot;Context Waterfall&quot; and targeted system instructions paired with a visual outlining tool to solve the common pitfalls of AI-assisted writing models (like clichéd phrasing and predictable formatting).
+        <div className="p-8 space-y-8 text-[13.5px] leading-relaxed text-stone-600">
+          <p className="text-[14.5px] text-stone-800 font-serif italic">
+            A minimalist drafting interface designed for serious, long-form writing. It pairs a visual outlining tool with a structured text-generation pipeline to give you absolute control over narrative progression, tone, and pacing.
           </p>
           
           <div>
-            <h3 className="text-[10px] uppercase font-bold tracking-widest opacity-50 mb-3 border-b border-black/10 pb-2">Instructions for Use</h3>
-            <ul className="list-disc pl-4 space-y-4">
-              <li>
-                <strong>1. Establish the Global Context:</strong> Open the sidebar to set the overarching tone, style, and instructions. These govern the entire manuscript securely to ensure consistency across chapters.
+            <h3 className="text-[9.5px] uppercase font-bold tracking-widest text-stone-400 mb-4 border-b border-stone-100 pb-2.5">Core Workflow</h3>
+            <ul className="space-y-4">
+              <li className="flex gap-3">
+                <span className="text-[10px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0 h-fit">01</span>
+                <div>
+                  <strong className="text-stone-700 block mb-0.5">Set the Foundation</strong>
+                  Use the left-hand drawer to define your global subject, formatting, and tone. These rules ensure stylistic consistency across your entire manuscript.
+                </div>
               </li>
-              <li>
-                <strong>2. Outline Your Structure:</strong> Break your writing into chapters using the Outline space. You can drag and drop chapters to rearrange the sequence of events before any text is generated. <em>Note: A chapter cannot be drafted until you provide a prompt!</em>
+              <li className="flex gap-3">
+                <span className="text-[10px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0 h-fit">02</span>
+                <div>
+                  <strong className="text-stone-700 block mb-0.5">Assemble the Outline</strong>
+                  Build your narrative arc by adding structural nodes to the canvas. Drag and drop them to determine the perfect sequential flow.
+                </div>
               </li>
-              <li>
-                <strong>3. Prompting & Drafting:</strong> Switch to the Canvas view. Use the prompt field on each card to define specific plot points, arguments, or facts. Hit &quot;Draft&quot; to generate a continuous, contextually aware manuscript segment.
+              <li className="flex gap-3">
+                <span className="text-[10px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0 h-fit">03</span>
+                <div>
+                  <strong className="text-stone-700 block mb-0.5">Draft and Iterate</strong>
+                  Provide specific plot points or arguments for each node and hit &quot;Draft Fragment&quot;. The model will synthesize your instructions to construct the segment.
+                </div>
               </li>
-              <li>
-                <strong>4. Review and Humanize:</strong> If the prose feels too &quot;AI-like&quot;, click &quot;Humanize&quot;. This triggers a dedicated critical-thinking pass by the model to disrupt repetitive sentence lengths and scrub known AI buzzwords.
+              <li className="flex gap-3">
+                <span className="text-[10px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0 h-fit">04</span>
+                <div>
+                  <strong className="text-stone-700 block mb-0.5">Refine the Prose</strong>
+                  If the text feels mechanical, use the &quot;Rewrite&quot; function or directly edit the manuscript surface to adjust cadence, flow, and vocabulary manually in the seamless editor.
+                </div>
               </li>
-              <li>
-                <strong>5. Save & Export:</strong> Work is auto-saved locally. Export your finished manuscript to a unified Markdown (.md) file, or save a JSON backup for long-term secure storage.
+              <li className="flex gap-3">
+                <span className="text-[10px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0 h-fit">05</span>
+                <div>
+                  <strong className="text-stone-700 block mb-0.5">Secure Your Work</strong>
+                  Your progress is continuously saved to local storage. Export the completed manuscript, or save a project backup file to preserve your state.
+                </div>
               </li>
             </ul>
           </div>
