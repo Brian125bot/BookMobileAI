@@ -52,63 +52,51 @@ export default function ChapterCard({ chapter, index }: Props) {
   const displayNum = (index + 1).toString().padStart(2, '0');
   const wordCount = chapter.content ? chapter.content.trim().split(/\s+/).length : 0;
 
-  // Render a clean status pill tailored for the Slate Editorial theme
-  const renderStatusPill = (size: 'sm' | 'md' = 'sm') => {
-    const textStyle = size === 'sm' ? "text-[9px]" : "text-[10px]";
-    const iconSize = size === 'sm' ? "w-3 h-3" : "w-3.5 h-3.5";
-
+  // Render a clean status dot tailored for the streamlined theme
+  const renderStatusDot = () => {
     if (isBusy) {
       return (
-        <div className={`flex items-center gap-1.5 px-2 py-1 bg-stone-100 text-stone-700 rounded-md border border-stone-200 animate-pulse ${textStyle}`}>
-          <Loader2 className={`${iconSize} animate-spin`} />
-          <span className="uppercase tracking-wider font-semibold font-mono">Processing...</span>
+        <div className="flex items-center gap-1.5" title="Processing">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
         </div>
       );
     }
 
     if (chapter.errorMessage) {
       return (
-        <div className={`flex items-center gap-1.5 px-2 py-1 bg-red-50 text-red-700 rounded-md border border-red-100 ${textStyle}`} title={chapter.errorMessage}>
-          <AlertCircle className={iconSize} />
-          <span className="uppercase tracking-wider font-semibold font-mono">Error</span>
+        <div className="flex items-center gap-1.5" title={chapter.errorMessage}>
+          <div className="w-2 h-2 rounded-full bg-red-500"></div>
         </div>
       );
     }
 
     if (chapter.status === 'completed' || chapter.content) {
       return (
-        <div className={`flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-800 rounded-md border border-emerald-100 ${textStyle}`}>
-          <CheckCircle2 className={`${iconSize} text-emerald-600`} />
-          <span className="uppercase tracking-wider font-semibold font-mono">Drafted</span>
+        <div className="flex items-center gap-1.5" title="Drafted">
+          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
         </div>
       );
     }
 
     return (
-      <div className={`flex items-center gap-1.5 px-2 py-1 bg-stone-100 text-stone-500 rounded-md border border-stone-200 ${textStyle}`}>
-        <CircleDashed className={iconSize} />
-        <span className="uppercase tracking-wider font-semibold font-mono">Empty</span>
+      <div className="flex items-center gap-1.5" title="Empty">
+        <div className="w-2 h-2 rounded-full bg-stone-300"></div>
       </div>
     );
   };
 
-  let cardBorderClass = 'border-stone-200/90 shadow-xs hover:border-stone-450 hover:shadow-md hover:bg-[#fafaf7]/50';
-  let badgeClass = 'bg-stone-900 text-stone-50 border-stone-950';
+  let cardBorderClass = 'border-stone-200 shadow-xs hover:border-stone-300 hover:shadow-sm';
+  let topAccentStyle = 'bg-stone-200';
+  
   if (isDragging) {
-    cardBorderClass = 'border-stone-950 shadow-2xl bg-white';
-    badgeClass = 'bg-stone-900 text-stone-50 border-stone-950';
+    cardBorderClass = 'border-stone-400 shadow-xl bg-white';
+    topAccentStyle = 'bg-stone-900';
   } else if (isBusy) {
-    cardBorderClass = 'border-indigo-200 shadow-md bg-[#fafbff]/70 border-l-3 border-l-indigo-400 hover:border-indigo-400';
-    badgeClass = 'bg-indigo-600 text-white border-indigo-700 animate-pulse';
+    topAccentStyle = 'bg-blue-400 animate-pulse';
   } else if (chapter.errorMessage) {
-    cardBorderClass = 'border-red-200 shadow-xs bg-red-50/10 border-l-3 border-l-red-400 hover:border-red-300';
-    badgeClass = 'bg-red-650 text-white border-red-700';
+    topAccentStyle = 'bg-red-400';
   } else if (chapter.content) {
-    cardBorderClass = 'border-emerald-250/70 hover:border-emerald-350 shadow-xs bg-white border-l-3 border-l-emerald-500 hover:bg-emerald-50/5';
-    badgeClass = 'bg-emerald-700 text-white border-emerald-800';
-  } else {
-    cardBorderClass = 'border-stone-200/90 shadow-xs hover:border-stone-450 hover:shadow-md hover:bg-[#fafaf7]/55 border-l-3 border-l-stone-350/70';
-    badgeClass = 'bg-stone-500 text-stone-100 border-stone-600';
+    topAccentStyle = 'bg-emerald-400';
   }
 
   return (
@@ -169,7 +157,7 @@ export default function ChapterCard({ chapter, index }: Props) {
               <div className="flex-1 flex flex-col gap-2 min-h-[140px]">
                 <div className="flex items-center justify-between">
                   <span className="text-[9px] font-bold font-mono uppercase tracking-[0.15em] text-stone-400">Prompt Instructions</span>
-                  {renderStatusPill('sm')}
+                  {renderStatusDot()}
                 </div>
                 <textarea
                   value={chapter.prompt}
@@ -225,20 +213,8 @@ export default function ChapterCard({ chapter, index }: Props) {
                     <span className="text-[10px] uppercase tracking-widest font-bold font-mono">Typographic Workspace</span>
                   </div>
                   
-                  {/* Styled Segmented Control Button Pill */}
-                  <div className="flex rounded-lg bg-stone-100 p-0.5 border border-stone-200">
-                    <button
-                      onClick={() => setIsEditingMaximizedManuscript(false)}
-                      className={`text-[9px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded transition-all cursor-pointer ${!isEditingMaximizedManuscript ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-850'}`}
-                    >
-                      Preview
-                    </button>
-                    <button
-                      onClick={() => setIsEditingMaximizedManuscript(true)}
-                      className={`text-[9px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded transition-all cursor-pointer ${isEditingMaximizedManuscript ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-855'}`}
-                    >
-                      Edit
-                    </button>
+                  {/* Styled Segmented Control Button Pill (Removed in favor of seamless editing) */}
+                  <div className="flex items-center gap-1 opacity-0 pointer-events-none">
                   </div>
                 </div>
 
@@ -248,16 +224,21 @@ export default function ChapterCard({ chapter, index }: Props) {
               </div>
 
               {/* Continuous clean pages canvas section */}
-              <div className="flex-1 overflow-y-auto px-6 md:px-16 py-12 md:py-20 select-text bg-[#fdfdfc]/50">
+              <div 
+                className="flex-1 overflow-y-auto px-6 md:px-16 py-12 md:py-20 select-text bg-[#fdfdfc]/50 cursor-text group/editor"
+                onPointerDown={() => setIsEditingMaximizedManuscript(true)}
+              >
                 <div className="max-w-2xl mx-auto min-h-full">
                   {/* Markdown typographic print renderer */}
-                  {isEditingMaximizedManuscript ? (
+                  {isEditingMaximizedManuscript && chapter.content ? (
                     <div className="h-full flex flex-col">
                       <textarea
+                        autoFocus
                         value={chapter.content || ''}
                         onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                        onBlur={() => setIsEditingMaximizedManuscript(false)}
                         placeholder="Draft directly or let Gemini generate it. This workspace supports standard markdown format..."
-                        className="w-full flex-1 min-h-[450px] leading-relaxed text-stone-850 text-base md:text-lg font-serif bg-transparent focus:outline-none resize-none placeholder-stone-300 border-none px-0 py-0"
+                        className="w-full flex-1 min-h-[450px] leading-relaxed text-stone-850 text-base md:text-lg font-serif bg-transparent focus:outline-none resize-none placeholder-stone-300 border-none px-0 py-0 overflow-visible"
                         onPointerDown={(e) => e.stopPropagation()}
                         onKeyDown={(e) => e.stopPropagation()}
                       />
@@ -267,11 +248,15 @@ export default function ChapterCard({ chapter, index }: Props) {
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
                     </article>
                   ) : (
-                    <div className="h-[280px] flex flex-col items-center justify-center text-center p-8 select-none">
-                      <div className="w-12 h-12 rounded-full bg-stone-50/50 border border-stone-100 flex items-center justify-center mb-4 text-stone-300">✍</div>
-                      <p className="font-serif italic text-stone-400 text-sm max-w-md">
-                        There is no written text here yet. Click the &quot;Edit&quot; tab above to formulate story cells manually, or feed coordinates into the prompt field on the left and click &quot;Draft Segment&quot;.
-                      </p>
+                    <div className="h-full flex flex-col">
+                       <textarea
+                        value={chapter.content || ''}
+                        onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                        placeholder="Start typing your manuscript here..."
+                        className="w-full flex-1 min-h-[450px] leading-relaxed text-stone-400 italic text-base md:text-lg font-serif bg-transparent focus:outline-none resize-none placeholder-stone-300 border-none px-0 py-0"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      />
                     </div>
                   )}
                 </div>
@@ -286,16 +271,17 @@ export default function ChapterCard({ chapter, index }: Props) {
       <div
         {...attributes}
         {...listeners}
-        className={`group bg-white absolute inset-0 rounded-xl border ${cardBorderClass} transition-all duration-300 flex flex-col p-5 select-none ${isMaximized ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
+        className={`group bg-white absolute inset-0 rounded-xl border ${cardBorderClass} transition-all duration-300 flex flex-col pt-4 px-5 pb-3 select-none overflow-hidden ${isMaximized ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
       >
-        {/* Module Number badge */}
-        <div className={`absolute -top-2.5 -left-2 border text-[9px] font-mono font-bold px-2 py-0.5 rounded-md z-10 shadow-xs transition-colors duration-300 ${badgeClass}`}>
-          CH {displayNum}
-        </div>
+        {/* Subtle Top Border Accent for Status */}
+        <div className={`absolute top-0 left-0 right-0 h-1 transition-colors duration-300 ${topAccentStyle}`}></div>
         
         {/* Card Header Title and Maximize trigger */}
-        <div className="flex justify-between items-start mb-3 shrink-0">
-          <div className="flex items-center gap-3 w-[78%]">
+        <div className="flex justify-between items-start mb-3 shrink-0 mt-2">
+          <div className="flex items-center gap-2 w-[78%]">
+            <span className="text-[10px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">
+              {displayNum}
+            </span>
             <input
               value={chapter.title}
               onChange={(e) => updateChapter(chapter.id, { title: e.target.value })}
@@ -331,10 +317,10 @@ export default function ChapterCard({ chapter, index }: Props) {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button
                 onClick={(e) => { e.stopPropagation(); setIsMaximized(true); }}
-                className="p-1 px-1.5 hover:bg-stone-100/80 text-stone-400 hover:text-stone-900 transition-colors rounded-md border border-transparent hover:border-stone-200 cursor-pointer"
+                className="p-1.5 hover:bg-stone-100 text-stone-400 hover:text-stone-900 transition-colors rounded-md cursor-pointer"
                 title="Maximize Focus Workspace (Zen Mode)"
                 onPointerDown={(e) => e.stopPropagation()}
               >
@@ -342,12 +328,12 @@ export default function ChapterCard({ chapter, index }: Props) {
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
-                className="p-1 px-1.5 hover:bg-red-50 text-stone-300 hover:text-red-600 transition-colors rounded-md cursor-pointer border border-transparent hover:border-red-100 opacity-40 group-hover:opacity-100"
+                className="p-1.5 hover:bg-red-50 text-stone-400 hover:text-red-600 transition-colors rounded-md cursor-pointer"
                 title="Delete Structural Segments"
                 disabled={isBusy}
                 onPointerDown={(e) => e.stopPropagation()}
               >
-                ✕
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
@@ -370,64 +356,69 @@ export default function ChapterCard({ chapter, index }: Props) {
           </div>
           
           {/* Generated Text Scroll segment */}
-          <div className="flex-1 flex flex-col min-h-0 border-t border-stone-100 mt-1 pt-3">
+          <div className="flex-1 flex flex-col min-h-0 border-t border-stone-100 mt-1 pt-3 group/editor">
             <div className="flex items-center justify-between mb-2 shrink-0">
               <span className="text-[9px] font-bold font-mono uppercase tracking-[0.15em] text-stone-400">STORY MANUSCRIPT</span>
-              <button 
-                onClick={(e) => { e.stopPropagation(); setIsEditingCanvasManuscript(!isEditingCanvasManuscript); }}
-                onPointerDown={(e) => e.stopPropagation()}
-                className="text-[9px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 px-1.5 py-0.5 rounded border border-stone-200 hover:bg-stone-50 transition-all cursor-pointer font-bold"
-              >
-                {isEditingCanvasManuscript ? "View" : "Edit"}
-              </button>
             </div>
-            <div className="flex-1 overflow-y-auto pr-1 select-text scrollbar-thin scrollbar-thumb-stone-200" onPointerDown={(e) => e.stopPropagation()}>
-              {isEditingCanvasManuscript ? (
+            <div 
+              className="flex-1 overflow-y-auto select-text scrollbar-thin scrollbar-thumb-stone-200 cursor-text -mx-2 px-2 rounded-lg hover:bg-stone-50/50 transition-colors" 
+              onPointerDown={(e) => { e.stopPropagation(); setIsEditingCanvasManuscript(true); }}
+            >
+              {isEditingCanvasManuscript && chapter.content ? (
                 <textarea
+                  autoFocus
                   value={chapter.content || ''}
                   onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                  onBlur={() => setIsEditingCanvasManuscript(false)}
                   placeholder="Draft story prose content manually here..."
-                  className="w-full h-full leading-relaxed text-[11.5px] font-serif text-stone-850 bg-[#fdfbf8] border border-stone-200/75 hover:border-stone-300 rounded-lg p-2.5 resize-none focus:bg-white focus:outline-none focus:ring-1.5 focus:ring-stone-600/10 focus:border-stone-550 transition-all"
+                  className="w-full h-full leading-relaxed text-[11.5px] font-serif text-stone-850 bg-transparent border-none resize-none outline-none py-1 overflow-visible"
                   onPointerDown={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
                 />
               ) : chapter.content ? (
-                <div className="prose prose-stone prose-sm max-w-none text-[11.5px] leading-relaxed text-stone-700 font-serif prose-p:mb-3 prose-p:indent-4 opacity-90">
+                <div className="prose prose-stone prose-sm max-w-none text-[11.5px] leading-relaxed text-stone-700 font-serif prose-p:mb-3 prose-p:indent-4 opacity-90 py-1 py-1">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center p-4 border border-dashed border-stone-200/60 rounded-lg bg-stone-50/50 text-center text-[10.5px] text-stone-400 font-serif italic selection:bg-transparent">
-                  Draft brief empty. Click &quot;Draft&quot; to invoke Gemini.
-                </div>
+                <textarea
+                  value={chapter.content || ''}
+                  onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                  placeholder="Draft empty. Click to write, or click 'Draft' below."
+                  className="w-full h-full leading-relaxed text-[10.5px] font-serif text-stone-400 italic bg-transparent border-none resize-none outline-none overflow-visible py-1"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
               )}
             </div>
           </div>
         </div>
 
         {/* Card Actions Bottom Row Footer */}
-        <div className="flex justify-between items-center pt-3 mt-3 shrink-0 border-t border-stone-100">
-          <div className="flex gap-2">
+        <div className="flex justify-between items-center pt-2 mt-2 shrink-0 opacity-50 hover:opacity-100 transition-opacity">
+          <div className="flex gap-1.5 focus-within:opacity-100">
             <button
               onClick={(e) => { e.stopPropagation(); generateChapter(chapter.id); }}
               disabled={isBusy || !chapter.prompt.trim()}
-              className="text-[9px] font-mono uppercase font-bold tracking-widest text-stone-800 hover:text-stone-950 disabled:opacity-30 border border-stone-200 rounded px-2.5 py-1.5 bg-stone-50 hover:bg-stone-100 transition-all active:scale-[0.96] disabled:active:scale-100 cursor-pointer shadow-2xs"
+              className="text-[9px] font-sans font-medium text-stone-600 hover:text-stone-900 disabled:opacity-30 rounded px-2.5 py-1 hover:bg-stone-100 transition-all cursor-pointer border border-transparent hover:border-stone-200"
               onPointerDown={(e) => e.stopPropagation()}
               title="Generate raw sequence data"
             >
-              Draft
+              Draft Fragment
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); rewriteChapter(chapter.id); }}
               disabled={isBusy || !chapter.content}
-              className="text-[9px] font-mono uppercase font-bold tracking-widest text-stone-650 hover:text-stone-950 disabled:opacity-30 border border-stone-200 rounded px-2.5 py-1.5 bg-stone-50 hover:bg-stone-100 transition-all active:scale-[0.96] disabled:active:scale-100 cursor-pointer shadow-2xs"
+              className="text-[9px] font-sans font-medium text-stone-600 hover:text-stone-900 disabled:opacity-30 rounded px-2.5 py-1 hover:bg-stone-100 transition-all cursor-pointer border border-transparent hover:border-stone-200"
               onPointerDown={(e) => e.stopPropagation()}
               title="Humantize generated prose"
             >
-              Humanize
+              Rewrite
             </button>
           </div>
           
-          {renderStatusPill('sm')}
+          <div className="pr-1">
+            {renderStatusDot()}
+          </div>
         </div>
       </div>
     </div>

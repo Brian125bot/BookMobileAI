@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
-import { Save, Upload, Download, Info, Undo2, Redo2, Loader2, Check, ChevronDown, FileText } from 'lucide-react';
+import { Save, Upload, Download, Info, Undo2, Redo2, Loader2, Check, ChevronDown, FileText, LayoutGrid, List, Menu } from 'lucide-react';
 import AboutModal from '../modals/AboutModal';
 
 export default function TopNav() {
@@ -28,6 +28,8 @@ export default function TopNav() {
   const [isSaving, setIsSaving] = useState(false);
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isDocumentMenuOpen, setIsDocumentMenuOpen] = useState(false);
+  const documentMenuRef = useRef<HTMLDivElement>(null);
 
   const AVAILABLE_MODELS = [
     { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash', desc: 'Fast, high quality defaults' },
@@ -45,6 +47,9 @@ export default function TopNav() {
       }
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
         setIsExportOpen(false);
+      }
+      if (documentMenuRef.current && !documentMenuRef.current.contains(event.target as Node)) {
+        setIsDocumentMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -390,46 +395,48 @@ export default function TopNav() {
       </div>
 
       {/* CENTER ZONE: DUAL VIEW SWITCHER & HISTORY CONTROLS */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* VIEW SELECTOR */}
-        <div className="flex items-center p-0.5 bg-stone-200/60 rounded-lg border border-stone-200">
+        <div className="flex items-center p-0.5 bg-stone-100 rounded-full border border-stone-200/60 transition-colors">
           <button 
-            className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-150 active:scale-95 cursor-pointer ${viewMode === 'canvas' ? 'bg-white text-stone-900 shadow-sm font-semibold' : 'text-stone-500 hover:text-[#1a1a1a]'}`}
+            className={`p-1.5 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${viewMode === 'canvas' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
             onClick={() => setViewMode('canvas')}
+            title="Canvas View"
           >
-            Canvas
+            <LayoutGrid className="w-4 h-4" />
           </button>
           <button 
-            className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-150 active:scale-95 cursor-pointer ${viewMode === 'outline' ? 'bg-white text-stone-900 shadow-sm font-semibold' : 'text-stone-500 hover:text-[#1a1a1a]'}`}
+            className={`p-1.5 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${viewMode === 'outline' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
             onClick={() => setViewMode('outline')}
+            title="Outline View"
           >
-            Outline
+            <List className="w-4 h-4" />
           </button>
         </div>
 
         {/* HISTORY UNDO/REDO */}
-        <div className="flex bg-stone-200/40 rounded-lg border border-stone-200 overflow-hidden">
+        <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
           <button 
             onClick={undo}
             disabled={past.length === 0}
-            className="px-3 py-1.5 text-stone-700 hover:bg-stone-200/80 hover:text-stone-900 disabled:opacity-20 active:scale-95 transition-all cursor-pointer border-r border-stone-200"
+            className="p-1.5 text-stone-500 hover:text-stone-900 disabled:opacity-20 active:scale-95 transition-all cursor-pointer rounded"
             title="Undo"
           >
-            <Undo2 className="w-3.5 h-3.5" />
+            <Undo2 className="w-4 h-4" />
           </button>
           <button 
             onClick={redo}
             disabled={future.length === 0}
-            className="px-3 py-1.5 text-stone-700 hover:bg-stone-200/80 hover:text-stone-900 disabled:opacity-20 active:scale-95 transition-all cursor-pointer"
+            className="p-1.5 text-stone-500 hover:text-stone-900 disabled:opacity-20 active:scale-95 transition-all cursor-pointer rounded"
             title="Redo"
           >
-            <Redo2 className="w-3.5 h-3.5" />
+            <Redo2 className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* RIGHT ZONE: UTILITIES & EXPORTS */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* DYNAMIC MODEL SELECTOR DROPDOWN */}
         <div className="relative inline-block text-left" ref={dropdownRef}>
           <button
@@ -488,44 +495,64 @@ export default function TopNav() {
           className="hidden" 
         />
         
-        {/* UTILITY BUTTON ACTION ROW */}
-        <div className="flex items-center bg-stone-200/40 rounded-lg border border-stone-200 p-0.5">
-          <button 
-            onClick={() => setIsAboutOpen(true)}
-            className="px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider hover:bg-white rounded-md text-stone-700 hover:text-stone-900 transition-all cursor-pointer flex items-center gap-1.5"
-            title="About BookMobile AI"
+        {/* DOCUMENT ACTIONS MENU */}
+        <div className="relative inline-block text-left" ref={documentMenuRef}>
+          <button
+            onClick={() => setIsDocumentMenuOpen(!isDocumentMenuOpen)}
+            className="p-2 hover:bg-stone-100 rounded-md text-stone-500 hover:text-stone-900 transition-colors cursor-pointer flex items-center justify-center"
+            title="Document Settings & Actions"
           >
-            <Info className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">About</span>
+            <Menu className="w-4 h-4" />
           </button>
-          
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider hover:bg-white rounded-md text-stone-700 hover:text-stone-900 transition-all cursor-pointer flex items-center gap-1.5"
-            title="Load Local Project backup"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Load</span>
-          </button>
-          
-          <button 
-            onClick={handleSaveProject}
-            className="px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider hover:bg-white rounded-md text-stone-700 hover:text-stone-900 transition-all cursor-pointer flex items-center gap-1.5"
-            title="Backup configuration project"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Backup</span>
-          </button>
-          
-          <button 
-            onClick={handleManualSave}
-            disabled={!hasUnsavedChanges || isSaving}
-            className="px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider hover:bg-white disabled:hover:bg-transparent rounded-md text-stone-700 disabled:opacity-20 disabled:hover:text-stone-700 hover:text-stone-900 transition-all cursor-pointer flex items-center gap-1.5"
-            title="Manual Database Save"
-          >
-            <Save className="w-3.5 h-3.5" />
-            <span className="hidden md:inline font-semibold">Save</span>
-          </button>
+
+          {isDocumentMenuOpen && (
+            <div className="absolute right-0 mt-2 w-56 bg-white border border-stone-200/80 rounded-xl shadow-lg z-50 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="px-3.5 py-2 border-b border-stone-100 mb-1">
+                <span className="text-[9px] uppercase tracking-wider font-bold text-stone-400 font-mono block">Document Actions</span>
+              </div>
+              
+              <ul className="py-1">
+                <li>
+                  <button 
+                    onClick={() => { handleManualSave(); setIsDocumentMenuOpen(false); }}
+                    disabled={!hasUnsavedChanges || isSaving}
+                    className="w-full text-left px-3.5 py-2 hover:bg-stone-50 transition-colors flex items-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+                  >
+                    <Save className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700" />
+                    <span className="text-xs font-medium text-stone-700 group-hover:text-stone-900">Force Save Current</span>
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => { handleSaveProject(); setIsDocumentMenuOpen(false); }}
+                    className="w-full text-left px-3.5 py-2 hover:bg-stone-50 transition-colors flex items-center gap-2.5 cursor-pointer group"
+                  >
+                    <Download className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700" />
+                    <span className="text-xs font-medium text-stone-700 group-hover:text-stone-900">Backup Backup Project</span>
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => { fileInputRef.current?.click(); setIsDocumentMenuOpen(false); }}
+                    className="w-full text-left px-3.5 py-2 hover:bg-stone-50 transition-colors flex items-center gap-2.5 cursor-pointer group"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700" />
+                    <span className="text-xs font-medium text-stone-700 group-hover:text-stone-900">Load Project Backup</span>
+                  </button>
+                </li>
+                <div className="h-[1px] bg-stone-100 my-1 mx-2"></div>
+                <li>
+                  <button 
+                    onClick={() => { setIsAboutOpen(true); setIsDocumentMenuOpen(false); }}
+                    className="w-full text-left px-3.5 py-2 hover:bg-stone-50 transition-colors flex items-center gap-2.5 cursor-pointer group"
+                  >
+                    <Info className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700" />
+                    <span className="text-xs font-medium text-stone-700 group-hover:text-stone-900">About BookMobile</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* PRIMARY CALL TO ACTION BUTTON WITH FORMATS DROPDOWN */}

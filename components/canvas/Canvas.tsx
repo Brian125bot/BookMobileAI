@@ -60,7 +60,7 @@ export default function Canvas() {
 
   if (!mounted || !isLoaded) {
     return (
-      <section className="flex-1 p-8 bg-stone-50/50 flex flex-col items-center justify-center font-sans">
+      <section className="flex-1 p-8 bg-[#faf9f6] flex flex-col items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3 animate-pulse">
           <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
           <div className="text-[10px] uppercase font-bold tracking-widest text-stone-400">Initializing Writing Workspace...</div>
@@ -70,34 +70,38 @@ export default function Canvas() {
   }
 
   return (
-    <section className="flex-1 p-6 md:p-8 bg-stone-50/50 flex flex-col relative overflow-hidden font-sans">
-      {/* CANVAS HEADER */}
-      <div className="flex justify-between items-center mb-8 shrink-0">
-        <div className="flex items-center gap-3">
-          {/* Mobile hamburger to toggle sidebar drawer */}
-          <button
-            onClick={toggleSidebar}
-            className="md:hidden p-2 hover:bg-stone-200 text-stone-600 hover:text-stone-900 border border-stone-200/80 rounded-lg cursor-pointer transition-colors shrink-0"
-            title="Configure settings drawer"
-          >
-            <Menu className="w-4.5 h-4.5" />
-          </button>
-          
-          <div>
-            <h2 className="text-3xl font-serif text-stone-900 leading-none">Manuscript Canvas</h2>
-            <p className="text-xs text-stone-500 font-serif italic mt-1.5 pl-0.5">Drag individual elements to reorder the structural manuscript layout</p>
+    <section className="flex-1 flex flex-col relative overflow-hidden font-sans bg-[#faf9f6]">
+      {/* Subtle Grid / Dot background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-70 pointer-events-none"></div>
+      
+      <div className="p-6 md:p-8 flex flex-col h-full relative z-10 w-full">
+        {/* CANVAS HEADER */}
+        <div className="flex justify-between items-center mb-8 shrink-0">
+          <div className="flex items-center gap-3">
+            {/* Mobile hamburger to toggle sidebar drawer */}
+            <button
+              onClick={toggleSidebar}
+              className="md:hidden p-2 hover:bg-stone-200 text-stone-600 hover:text-stone-900 border border-stone-200/80 rounded-lg cursor-pointer transition-colors shrink-0"
+              title="Configure settings drawer"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            
+            <div>
+              <h2 className="text-2xl md:text-3xl font-serif text-stone-900 leading-none">Manuscript Canvas</h2>
+              <p className="text-[11px] text-stone-500 font-serif italic mt-1.5 pl-0.5">Drag structural nodes to reorder the layout</p>
+            </div>
           </div>
+
+          <button 
+            onClick={addChapter}
+            className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest border border-stone-200 rounded-lg bg-white px-3 py-2 hover:bg-stone-50 hover:text-stone-900 transition-all active:scale-95 shadow-sm cursor-pointer border-b-2 border-b-stone-200"
+          >
+            <span className="text-sm font-normal -mt-0.5 shrink-0">+</span> Add Node
+          </button>
         </div>
 
-        <button 
-          onClick={addChapter}
-          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest border border-stone-300 rounded-lg bg-white px-4 py-2 hover:bg-stone-900 hover:text-stone-50 hover:border-stone-900 transition-all active:scale-95 shadow-sm cursor-pointer"
-        >
-          <span className="text-sm font-normal -mt-0.5 shrink-0">+</span> Add Segment
-        </button>
-      </div>
-
-      {/* CORE Drag & Drop SWEEPER VIEW CONTAINER */}
+        {/* CORE Drag & Drop SWEEPER VIEW CONTAINER */}
       <div className="flex-1 overflow-y-auto pb-28 pr-1">
         <DndContext
           sensors={sensors}
@@ -145,19 +149,19 @@ export default function Canvas() {
         </DndContext>
       </div>
 
-      {/* PIPELINE ACTIVE RUNTIME BADGE */}
-      {chapters.some(c => c.status === 'generating' || c.status === 'rewriting') && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 border border-stone-200/80 rounded-xl flex items-center gap-4 bg-white/95 backdrop-blur-md shadow-lg max-w-lg w-10/12 md:w-full z-20 animate-in fade-in-50 slide-in-from-bottom-5">
-          <div className="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center font-mono text-white text-[11px] animate-spin shrink-0">
-            ❋
+        {/* PIPELINE ACTIVE RUNTIME BADGE */}
+        {chapters.some(c => c.status === 'generating' || c.status === 'rewriting') && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 border border-stone-200/80 rounded-2xl flex items-center gap-4 bg-white/95 backdrop-blur-md shadow-lg max-w-md w-11/12 md:w-full z-20 animate-in fade-in-50 slide-in-from-bottom-5">
+            <div className="w-6 h-6 rounded-full text-blue-500 flex items-center justify-center font-mono text-[11px] animate-spin shrink-0">
+              <Loader2 className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] font-mono uppercase tracking-[0.1em] font-bold text-stone-800 shrink-0 block mb-[1px]">Executing Prompts</span>
+              <span className="text-[9.5px] italic font-serif text-stone-500 block truncate">Writing dynamic sequences via Gemini...</span>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <span className="text-[10px] font-mono uppercase tracking-[0.12em] font-semibold text-stone-800 shrink-0 block mb-0.5">Gemini Processing Model</span>
-            <span className="text-[10px] text-stone-400 block truncate">Writing dynamic chapter sequences with system parameters...</span>
-          </div>
-          <span className="text-[9px] uppercase tracking-widest font-bold font-mono px-2 py-1 bg-stone-100 rounded text-stone-600 animate-pulse">Running</span>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 }

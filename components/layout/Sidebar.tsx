@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useStore, WritingStyle } from '@/lib/store';
-import { PanelLeftClose, PanelLeftOpen, Sparkles, Sliders, AlertTriangle } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, Sparkles, Sliders, AlertTriangle, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 
 export default function Sidebar() {
   const { settings, setSettings, isLoaded, isSidebarOpen, toggleSidebar } = useStore();
   const [mounted, setMounted] = useState(false);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -86,78 +87,94 @@ export default function Sidebar() {
             )}
             
             {/* Subject configuration container */}
-            <section className="space-y-5">
+            <section className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Book / Essay Subject</label>
+                <label className="text-[9.5px] uppercase font-bold tracking-wider text-stone-500 block mb-1">Book Subject</label>
                 <textarea
                   value={settings.subject}
                   onChange={(e) => setSettings({ subject: e.target.value })}
                   placeholder="The unspoken rules of editorial precision..."
-                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg p-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all resize-none h-20 shadow-xs"
+                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-md p-2.5 text-xs italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400/30 focus:border-stone-400 transition-all resize-none h-16 shadow-xs"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Writing Style Format</label>
+                <label className="text-[9.5px] uppercase font-bold tracking-wider text-stone-500 block mb-1">Formatting Style</label>
                 <div className="relative">
                   <select
                     value={settings.writingStyle}
                     onChange={(e) => setSettings({ writingStyle: e.target.value as WritingStyle })}
-                    className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all appearance-none cursor-pointer shadow-xs"
+                    className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-md py-2 px-2.5 text-xs italic font-serif text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400/30 focus:border-stone-400 transition-all appearance-none cursor-pointer shadow-xs"
                   >
                     <option value="short_essay">Long-form Essay</option>
                     <option value="academic_paper">Academic Paper</option>
                     <option value="book">Manuscript Novel</option>
                   </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400 text-xs">▼</div>
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400 text-xs">▼</div>
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Narrative Mode & Tone</label>
+                <label className="text-[9.5px] uppercase font-bold tracking-wider text-stone-500 block mb-1">Tone & Voice</label>
                 <input
                   type="text"
                   value={settings.tone}
                   onChange={(e) => setSettings({ tone: e.target.value })}
-                  placeholder="e.g. Philosophical, slow-paced..."
-                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all shadow-xs"
+                  placeholder="Philosophical, slow-paced..."
+                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-md py-2 px-2.5 text-xs italic font-serif text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400/30 focus:border-stone-400 transition-all shadow-xs"
                 />
               </div>
             </section>
 
-            <div className="h-[1px] bg-stone-200/60"></div>
+            <div className="h-[1px] bg-stone-200/60 mt-1"></div>
 
-            {/* System / LLM controller parameters block */}
-            <section className="space-y-5 flex-1">
-              <div>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-stone-500" />
-                  <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block">System Anti-Trope Rules</label>
+            {/* System / LLM controller parameters block: Accordion */}
+            <section className="flex-1">
+              <button 
+                onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+                className="w-full flex items-center justify-between py-1.5 focus:outline-none group cursor-pointer"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Settings2 className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-600 transition-colors" />
+                  <span className="text-[9.5px] uppercase font-bold tracking-wider text-stone-500 group-hover:text-stone-700 transition-colors">Advanced Config</span>
                 </div>
-                <textarea
-                  value={settings.additionalInstructions}
-                  onChange={(e) => setSettings({ additionalInstructions: e.target.value })}
-                  placeholder="e.g. Eliminate passive voice, use descriptive visual descriptions..."
-                  className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg p-3 text-xs italic font-serif text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all resize-none h-30 shadow-xs leading-relaxed"
-                />
-              </div>
+                {isAdvancedOpen ? (
+                  <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+                ) : (
+                  <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                )}
+              </button>
+              
+              {isAdvancedOpen && (
+                <div className="space-y-4 mt-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                  <div>
+                    <label className="text-[9.5px] uppercase font-bold tracking-wider text-stone-500 block mb-1">Anti-Trope Rules</label>
+                    <textarea
+                      value={settings.additionalInstructions}
+                      onChange={(e) => setSettings({ additionalInstructions: e.target.value })}
+                      placeholder="e.g. Eliminate passive voice..."
+                      className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-md p-2.5 text-xs italic font-serif text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400/30 focus:border-stone-400 transition-all resize-none h-24 shadow-xs leading-relaxed"
+                    />
+                  </div>
 
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block mb-1.5">Local Auto-Save Engine</label>
-                <div className="relative">
-                  <select
-                    value={settings.autoSaveInterval}
-                    onChange={(e) => setSettings({ autoSaveInterval: Number(e.target.value) })}
-                    className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-lg py-2.5 px-3 text-sm italic font-serif text-stone-800 focus:outline-none focus:ring-1.5 focus:ring-stone-800/10 focus:border-stone-500 focus:bg-white transition-all appearance-none cursor-pointer shadow-xs"
-                  >
-                    <option value={0}>Disabled / Save Manually</option>
-                    <option value={1}>Every 1 Minute</option>
-                    <option value={5}>Every 5 Minutes</option>
-                    <option value={15}>Every 15 Minutes</option>
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400 text-xs">▼</div>
+                  <div>
+                    <label className="text-[9.5px] uppercase font-bold tracking-wider text-stone-500 block mb-1">Auto-Save Schedule</label>
+                    <div className="relative">
+                      <select
+                        value={settings.autoSaveInterval}
+                        onChange={(e) => setSettings({ autoSaveInterval: Number(e.target.value) })}
+                        className="w-full bg-white hover:bg-white/95 border border-stone-200/90 rounded-md py-2 px-2.5 text-xs italic font-serif text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400/30 focus:border-stone-400 transition-all appearance-none cursor-pointer shadow-xs"
+                      >
+                        <option value={0}>Save Manually</option>
+                        <option value={1}>Every 1 Minute</option>
+                        <option value={5}>Every 5 Minutes</option>
+                        <option value={15}>Every 15 Minutes</option>
+                      </select>
+                      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400 text-xs">▼</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </section>
           </div>
         )}

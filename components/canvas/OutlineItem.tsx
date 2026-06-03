@@ -51,6 +51,35 @@ export default function OutlineItem({ chapter, index }: Props) {
     return text.replace(/[#_*>`\[\]]/g, '').replace(/\n/g, ' ').trim();
   };
 
+  const renderStatusDot = () => {
+    if (isBusy) {
+      return (
+        <div className="flex items-center gap-1" title="Processing">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+        </div>
+      );
+    }
+    if (chapter.errorMessage) {
+      return (
+        <div className="flex items-center gap-1" title={chapter.errorMessage}>
+          <div className="w-2 h-2 rounded-full bg-red-500"></div>
+        </div>
+      );
+    }
+    if (chapter.status === 'completed' || chapter.content) {
+      return (
+        <div className="flex items-center gap-1" title="Drafted">
+          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1" title="Empty">
+        <div className="w-2 h-2 rounded-full bg-stone-300"></div>
+      </div>
+    );
+  };
+
   let summary = 'Instructions brief empty. Outline goals here.';
   if (chapter.summary) {
     summary = chapter.summary;
@@ -130,28 +159,8 @@ export default function OutlineItem({ chapter, index }: Props) {
 
         {/* Right status metrics and trash actions bar */}
         <div className="flex items-center gap-3 shrink-0 border-l border-stone-100 pl-4 h-8">
-          <div className="flex flex-col items-end w-22 select-none">
-            {isBusy ? (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-stone-100 text-stone-700/80 rounded border border-stone-200/80">
-                <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                <span className="text-[8px] font-mono font-bold uppercase tracking-wider">Loading</span>
-              </div>
-            ) : chapter.errorMessage ? (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-50 text-red-700 rounded border border-red-200" title={chapter.errorMessage}>
-                <AlertCircle className="w-2.5 h-2.5" />
-                <span className="text-[8px] font-mono font-bold uppercase tracking-wider">Error</span>
-              </div>
-            ) : chapter.status === 'completed' || chapter.content ? (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-150">
-                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                <span className="text-[8px] font-mono font-bold uppercase tracking-wider">Done</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-stone-100 text-stone-400 rounded border border-stone-150">
-                <CircleDashed className="w-2.5 h-2.5 text-stone-300" />
-                <span className="text-[8px] font-mono font-bold uppercase tracking-wider">Empty</span>
-              </div>
-            )}
+          <div className="flex flex-col items-end w-8 select-none justify-center">
+            {renderStatusDot()}
           </div>
         
           <button
@@ -216,43 +225,36 @@ export default function OutlineItem({ chapter, index }: Props) {
                 </span>
               )}
             </div>
-            
-            <div className="flex rounded-md bg-stone-100 p-0.5 border border-stone-200">
-              <button
-                onClick={() => setIsEditingOutlineManuscript(false)}
-                className={`text-[8.5px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded transition-all cursor-pointer ${!isEditingOutlineManuscript ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-900'}`}
-              >
-                Preview
-              </button>
-              <button
-                onClick={() => setIsEditingOutlineManuscript(true)}
-                className={`text-[8.5px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded transition-all cursor-pointer ${isEditingOutlineManuscript ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-900'}`}
-              >
-                Edit
-              </button>
-            </div>
           </div>
 
-          <div className="min-h-[140px] border border-stone-200/60 rounded-lg p-3.5 bg-white shadow-xs">
-            {isEditingOutlineManuscript ? (
+          <div 
+            className="min-h-[140px] border border-transparent hover:border-stone-200/60 transition-colors rounded-lg bg-white shadow-xs px-3.5 py-2 cursor-text group/editor"
+            onPointerDown={(e) => { e.stopPropagation(); setIsEditingOutlineManuscript(true); }}
+          >
+            {isEditingOutlineManuscript && chapter.content ? (
               <textarea
+                autoFocus
                 value={chapter.content || ''}
                 onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                onBlur={() => setIsEditingOutlineManuscript(false)}
                 placeholder="Draft formatted narrative story content here manually..."
-                className="w-full min-h-[180px] leading-relaxed text-xs text-stone-850 font-serif bg-transparent focus:outline-none resize-y placeholder-stone-300 border-none outline-none"
+                className="w-full min-h-[180px] leading-relaxed text-xs text-stone-850 font-serif bg-transparent focus:outline-none resize-y placeholder-stone-300 border-none outline-none py-1"
                 onPointerDown={(e) => e.stopPropagation()}
                 onKeyDown={(e) => e.stopPropagation()}
               />
             ) : chapter.content ? (
-              <article className="prose prose-stone max-w-none text-xs font-serif leading-relaxed text-stone-800 prose-p:mb-2.5 prose-p:indent-4 opacity-90 pr-1 max-h-[300px] overflow-y-auto">
+              <article className="prose prose-stone max-w-none text-xs font-serif leading-relaxed text-stone-800 prose-p:mb-2.5 prose-p:indent-4 opacity-90 pr-1 max-h-[300px] overflow-y-auto py-1">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{chapter.content}</ReactMarkdown>
               </article>
             ) : (
-              <div className="h-[120px] flex flex-col items-center justify-center text-center p-4 select-none bg-stone-50/30 rounded border border-dashed border-stone-200/50">
-                <p className="font-serif italic text-stone-400 text-xs max-w-md">
-                  There is no written text here yet. Click the &quot;Edit&quot; button above to write or click &quot;Preview&quot; and go to Canvas to draft with Gemini.
-                </p>
-              </div>
+              <textarea
+                value={chapter.content || ''}
+                onChange={(e) => updateChapter(chapter.id, { content: e.target.value })}
+                placeholder="Start typing your outline or manuscript..."
+                className="w-full min-h-[140px] leading-relaxed text-xs text-stone-400 italic font-serif bg-transparent focus:outline-none resize-y border-none outline-none py-1"
+                onPointerDown={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              />
             )}
           </div>
         </div>
